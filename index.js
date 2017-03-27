@@ -55,7 +55,13 @@ require([
               width: jsonResponse[0].layers[0].width,
               height: jsonResponse[0].layers[0].height,
               zeroIsBlank: true,
-              isometric: false
+              isometric: false,
+              shadowDistance: {
+                color: '0, 0, 33',
+                distance: 7,
+                darkness: 0.95
+              },
+              lightmap: []
             }]);
           });
         });
@@ -71,6 +77,16 @@ require([
 
         var context = CanvasControl.create("canavas", container.clientWidth, container.clientHeight, {}, containerName, true);
         
+        //CanvasControl.fullScreen();
+        var input = new CanvasInput(document, CanvasControl());
+
+        input.mouse_move(function(coords) {
+          mapLayers.map(function(layer) {
+            var t = layer.applyMouseFocus(coords.x, coords.y);
+            layer.setLight(t.x, t.y);
+          });
+        });
+
         function draw() {
           context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
           for (var i = 0; i < 0 + yrange; i++) {
@@ -80,6 +96,7 @@ require([
               });
             }
           }
+          requestAnimationFrame(draw);
         }
 
         return {

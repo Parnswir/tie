@@ -1,0 +1,17 @@
+{
+  "name": "portfolio-game",
+  "authors": [
+    "Parnswir <maximiliangrundke@googlemail.com>"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "JsIso": "a9d56b78a8a8a9439500b33ea813a5478cd4997a"
+  }
+}

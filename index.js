@@ -60,13 +60,11 @@ require([
             },
             lightmap: []
           }));
-          console.log(layers)
 
           tileEngine.init(layers);
         });
       });
     }
-
 
     function TileEngine(x, y, xrange, yrange) {
 
@@ -75,7 +73,9 @@ require([
       const containerName = "container";
       const container = document.getElementById(containerName);
 
-      const context = CanvasControl.create("canavas", container.clientWidth, container.clientHeight, {}, containerName, true);
+      const controlWidth = container.clientWidth;
+      const controlHeight = container.clientHeight;
+      const context = CanvasControl.create("canavas", controlWidth, controlHeight, {}, containerName, true);
 
       //CanvasControl.fullScreen();
       const input = new CanvasInput(document, CanvasControl());
@@ -88,9 +88,9 @@ require([
       });
 
       function draw() {
-        context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
-        for (let i = 0; i < 0 + yrange; i++) {
-          for (let j = 0; j < 0 + xrange; j++) {
+        context.clearRect(0, 0, controlWidth, controlHeight);
+        for (let i = y; i < yrange; i++) {
+          for (let j = x; j < xrange; j++) {
             mapLayers.map(function (layer) {
               layer.draw(i,j);
             });
@@ -102,7 +102,7 @@ require([
       return {
         init: function (layers) {
           for (let i = 0; i < 0 + layers.length; i++) {
-            mapLayers[i] = new TileField(context, CanvasControl().height, CanvasControl().width);
+            mapLayers[i] = new TileField(context, controlWidth, controlHeight);
             mapLayers[i].setup(layers[i]);
             mapLayers[i].flip("horizontal");
             mapLayers[i].rotate("left");

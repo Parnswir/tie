@@ -8,9 +8,10 @@ require([
     'jsiso/img/load',
     'jsiso/json/load',
     'jsiso/tile/Field',
-    'jsiso/pathfind/pathfind'
+    'jsiso/pathfind/pathfind',
+    '../../player'
   ],
-  function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind) {
+  function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, Player) {
     // -- FPS --------------------------------
     window.requestAnimFrame = (function() {
       return window.requestAnimationFrame ||
@@ -69,6 +70,7 @@ require([
     function TileEngine(x, y, xrange, yrange) {
 
       let mapLayers = [];
+      let players = [];
 
       const containerName = "container";
       const container = document.getElementById(containerName);
@@ -92,22 +94,46 @@ require([
         for (let i = y; i < yrange; i++) {
           for (let j = x; j < xrange; j++) {
             mapLayers.map(function (layer) {
-              layer.draw(i,j);
+              layer.draw(i, j);
             });
           }
+        }
+        for (let player of players) {
+          player.draw();
+          player.move();
         }
         requestAnimationFrame(draw);
       }
 
       return {
         init: function (layers) {
+          imgLoader([{
+            graphics: ["assets/rabbit.png"],
+            spritesheet: {
+              width: 50,
+              height: 50
+            }
+          }]).then(function(playerImages) {
+            let playerOptions = {
+              layer: mapLayers[0],
+              pathfindingLayer: mapLayers[0],
+              files: playerImages[0].files,
+              tileWidth: 32,
+              tileHeight: 32,
+              movementFrameCount: 8,
+              framesPerDirection: 4,
+              speed: 3
+            };
+            players.push(new Player(context, playerOptions, 2, 3, pathfind));
+          });
+
           for (let i = 0; i < 0 + layers.length; i++) {
             mapLayers[i] = new TileField(context, controlWidth, controlHeight);
             mapLayers[i].setup(layers[i]);
             mapLayers[i].flip("horizontal");
             mapLayers[i].rotate("left");
           }
-          draw();
+          draw()
         }
       }
 

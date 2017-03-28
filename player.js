@@ -23,10 +23,10 @@ define(() => {
 
     let getFrame = () => options.files[options.framesPerDirection * direction + movementFrame];
     let getFrameX = (offset) => pos.x - options.files[0].width / 2 + offset.x;
-    let getFrameY = (offset) => pos.x - options.files[0].height / 2 + offset.y;
+    let getFrameY = (offset) => pos.y - options.files[0].height / 2 + offset.y;
 
     this.goTo = function (x, y) {
-      pathfind(options.id, [tile.x, tile.y], [x, y], options.pathfindingLayer.getLayout(), false, false)
+      pathfind(options.id, [tile.x, tile.y], [x, y], options.pathfindingLayer.getLayout(), true, false)
         .then(function (data) {
           if (data.length > 0 && data[1] !== undefined) {
             path = data;

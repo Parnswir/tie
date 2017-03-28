@@ -86,6 +86,7 @@ require([
         mapLayers.map(function(layer) {
           let t = layer.applyMouseFocus(coords.x, coords.y);
           layer.setLight(t.x, t.y);
+          players[0].goTo(t.x, t.y);
         });
       });
 
@@ -116,7 +117,7 @@ require([
           }]).then(function(playerImages) {
             let playerOptions = {
               layer: mapLayers[0],
-              pathfindingLayer: mapLayers[0],
+              pathfindingLayer: mapLayers[1],
               files: playerImages[0].files,
               tileWidth: 32,
               tileHeight: 32,

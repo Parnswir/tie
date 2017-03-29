@@ -82,11 +82,29 @@ require([
       //CanvasControl.fullScreen();
       const input = new CanvasInput(document, CanvasControl());
 
-      input.mouse_move(function(coords) {
+      input.mouse_action(function(coords) {
         mapLayers.map(function(layer) {
           let t = layer.applyMouseFocus(coords.x, coords.y);
           players[0].goTo(t.x, t.y);
         });
+      });
+
+      input.keyboard(function(pressed, status) {
+        let player = players[0];
+        if (status) {
+          if (pressed === 37) {
+            player.goTo(player.getTile().x - 1, player.getTile().y);
+          }
+          if (pressed === 39) {
+            player.goTo(player.getTile().x + 1, player.getTile().y);
+          }
+          if (pressed === 38) {
+            player.goTo(player.getTile().x, player.getTile().y - 1);
+          }
+          if (pressed === 40) {
+            player.goTo(player.getTile().x, player.getTile().y + 1);
+          }
+        }
       });
 
       function draw() {

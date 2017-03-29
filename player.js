@@ -18,8 +18,6 @@ define(() => {
     let path = [];
     let movementFrame = Math.floor(Math.random() * options.framesPerDirection);
     let movementFrameTimer = Math.floor(Math.random() * options.movementFrameCount);
-    let repositioned = 0;
-
 
     let getFrame = () => options.files[options.framesPerDirection * direction + movementFrame];
     let getFrameX = (offset) => pos.x - options.files[0].width / 2 + offset.x;
@@ -43,8 +41,15 @@ define(() => {
       context.drawImage(getFrame(), getFrameX(offset), getFrameY(offset));
     };
 
-    this.move = function () {
+    this.getDirection = function () {
+      return direction;
+    };
 
+    this.setDirection = function (where) {
+      direction = where % 4;
+    };
+
+    this.move = function () {
       if (path.length > 0) {
         movementFrameTimer++;
         if (movementFrameTimer >= options.movementFrameCount - 1) {

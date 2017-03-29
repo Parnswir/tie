@@ -1,3 +1,5 @@
+const PLAYER_Z_INDEX = 5;
+
 requirejs.config({
     baseUrl: "./bower_components/JsIso/"
 });
@@ -12,7 +14,7 @@ require([
     '../../player'
   ],
   function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, Player) {
-    // -- FPS --------------------------------
+
     window.requestAnimFrame = (function() {
       return window.requestAnimationFrame ||
       window.webkitRequestAnimationFrame  ||
@@ -23,10 +25,8 @@ require([
         window.setTimeout(callback, 1000 / 60);
       };
     })();
-    // ---------------------------------------
 
     function launch() {
-
       jsonLoader(['map.json']).then(function(map) {
         map = map[0];
 
@@ -52,6 +52,7 @@ require([
             tileHeight: map.tileHeight,
             width: layer.width,
             height: layer.height,
+            zIndex: layer.zIndex,
             zeroIsBlank: true,
             isometric: false,
             shadowDistance: {
@@ -111,7 +112,7 @@ require([
         context.clearRect(0, 0, controlWidth, controlHeight);
         for (let i = y; i < yrange; i++) {
           for (let j = x; j < xrange; j++) {
-            mapLayers.map(function (layer) {
+            mapLayers.filter((layer) => layer.zIndex < PLAYER_Z_INDEX).forEach(function (layer) {
               layer.draw(i, j);
             });
           }
@@ -119,9 +120,16 @@ require([
         for (let player of players) {
           player.draw();
           player.move();
-          mapLayers.map(function(layer) {
+          mapLayers.forEach(function(layer) {
             layer.setLight(player.getTile().x, player.getTile().y);
           });
+        }
+        for (let i = y; i < yrange; i++) {
+          for (let j = x; j < xrange; j++) {
+            mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX).forEach(function (layer) {
+              layer.draw(i, j);
+            });
+          }
         }
         requestAnimationFrame(draw);
       }
@@ -153,6 +161,7 @@ require([
             mapLayers[i].setup(layers[i]);
             mapLayers[i].flip("horizontal");
             mapLayers[i].rotate("left");
+            mapLayers[i].zIndex = layers[i].zIndex;
           }
           draw()
         }

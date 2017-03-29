@@ -85,7 +85,6 @@ require([
       input.mouse_move(function(coords) {
         mapLayers.map(function(layer) {
           let t = layer.applyMouseFocus(coords.x, coords.y);
-          layer.setLight(t.x, t.y);
           players[0].goTo(t.x, t.y);
         });
       });
@@ -102,6 +101,9 @@ require([
         for (let player of players) {
           player.draw();
           player.move();
+          mapLayers.map(function(layer) {
+            layer.setLight(player.getTile().x, player.getTile().y);
+          });
         }
         requestAnimationFrame(draw);
       }
@@ -109,10 +111,10 @@ require([
       return {
         init: function (layers) {
           imgLoader([{
-            graphics: ["assets/rabbit.png"],
+            graphics: ["assets/player.png"],
             spritesheet: {
-              width: 50,
-              height: 50
+              width: 32,
+              height: 32
             }
           }]).then(function(playerImages) {
             let playerOptions = {
@@ -123,7 +125,7 @@ require([
               tileHeight: 32,
               movementFrameCount: 8,
               framesPerDirection: 4,
-              speed: 3
+              speed: 2
             };
             players.push(new Player(context, playerOptions, 2, 3, pathfind));
           });

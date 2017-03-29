@@ -5,12 +5,12 @@ define(() => {
     options.tileHeight = options.tileHeight || 32;
     options.movementFrameCount = options.movementFrameCount || 8;
     options.framesPerDirection = options.framesPerDirection || 4;
-    options.speed = options.speed || 3;
+    options.speed = options.speed || 1;
 
     let tile = {x, y};
     let pos = {
-      x: tile.x * options.tileWidth,
-      y: tile.y * options.tileHeight
+      x: tile.x * options.tileWidth + options.files[0].width / 2,
+      y: tile.y * options.tileHeight + options.files[0].width / 2
     };
 
     let direction = options.direction || 0;
@@ -26,7 +26,7 @@ define(() => {
     let getFrameY = (offset) => pos.y - options.files[0].height / 2 + offset.y;
 
     this.goTo = function (x, y) {
-      pathfind(options.id, [tile.x, tile.y], [x, y], options.pathfindingLayer.getLayout(), true, false)
+      pathfind(options.id, [tile.x, tile.y], [x, y], options.pathfindingLayer.getLayout(), false, false)
         .then(function (data) {
           if (data.length > 0 && data[1] !== undefined) {
             path = data;
@@ -44,8 +44,6 @@ define(() => {
     };
 
     this.move = function () {
-      let inPosX = false;
-      let inPosY = false;
 
       if (path.length > 0) {
         movementFrameTimer++;
@@ -53,55 +51,30 @@ define(() => {
           movementFrame = (movementFrame + 1) % 4;
           movementFrameTimer = 0;
         }
-        if (path[0].y > tile.y) {
-          pos.y += speed;
-          direction = 0;
-        }
-        if (path[0].y < tile.y) {
-          pos.y -= speed;
-          direction = 1;
-        }
-        if (path[0].x < tile.x) {
-          pos.x -= speed;
-          direction = 2;
-        }
-        if (path[0].x > tile.x) {
-          pos.x += speed;
-          direction = 3;
-        }
+        let tileWidth = options.tileWidth;
+        let tileHeight = options.tileHeight;
+        let frameWidth = options.files[0].width;
+        let frameHeight = options.files[0].height;
 
-        if (path[0].x === tile.x && path[0].y === tile.y) {
-          if (path.length === 1 && repositioned < 10) {
-            repositioned++;
-            if (pos.x - options.files[0].width / 2 < tile.x * options.tileWidth + options.tileWidth / 2) {
-              pos.x += Math.floor((tile.x * options.tileWidth + options.tileWidth / 2 - pos.x) / 4);
-            }
-            else if (pos.x + options.files[0].width / 2 > tile.x * options.tileWidth + options.tileWidth / 2) {
-              pos.x -= Math.floor((pos.x - tile.x * options.tileWidth + options.tileWidth / 2) / 4);
-            }
-            else {
-              inPosX = true;
-            }
-            if (pos.y - options.files[0].height / 2 < tile.y * options.tileHeight + options.tileHeight / 2) {
-              pos.y += Math.floor((tile.y * options.tileHeight + options.tileHeight / 2 - pos.y) / 4);
-            }
-            else if (pos.y + options.files[0].height / 2 > tile.y * options.tileHeight + options.tileHeight / 2) {
-              pos.y -= Math.floor((pos.y - tile.y * options.tileHeight + options.tileHeight / 2) / 4);
-            }
-            else {
-              inPosY = true;
-            }
-            if (inPosX && inPosY) {
-              movementFrame = 0;
-              repositioned = 0;
-              path.shift();
-            }
-          } else {
-            if (repositioned >= 10) {
-              movementFrame = 0;
-              repositioned = 0;
-            }
-            path.shift();
+        let targetX = path[0].x * tileWidth + frameWidth / 2;
+        let targetY = path[0].y * tileHeight + frameHeight / 2;
+
+        let inPosX = (targetX === pos.x);
+        let inPosY = (targetY === pos.y);
+
+        if (inPosX && inPosY) {
+          path.shift();
+          movementFrame = 0;
+        } else {
+          if (!inPosX) {
+            let modifier = (targetX - pos.x) / Math.abs(targetX - pos.x);
+            direction = modifier > 0 ? 3 : 2;
+            pos.x += modifier * speed;
+          }
+          if (!inPosY) {
+            let modifier = (targetY - pos.y) / Math.abs(targetY - pos.y);
+            direction = modifier > 0 ? 0 : 1;
+            pos.y += modifier * speed;
           }
         }
       }

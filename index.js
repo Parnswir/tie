@@ -27,8 +27,8 @@ require([
     })();
 
     function launch() {
-      jsonLoader(['map.json']).then(function(map) {
-        map = map[0];
+      jsonLoader(['map.json']).then(function(maps) {
+        let map = maps[0];
 
         let images = map.tilesets.map((tileset) => ({
             graphics: [tileset.image],
@@ -44,24 +44,13 @@ require([
         imgLoader(images).then(function(imgResponse) {
           let tileEngine = new TileEngine(0, 0, map.height, map.width);
 
-          let layers = map.layers.map((layer) => ({
-            layout: layer.data,
-            graphics: imgResponse[layer.tileset].files,
+          let layers = map.layers.map((layer) => Object.assign(layer, {
+          	graphics: imgResponse[layer.tileset].files,
             graphicsDictionary: imgResponse[layer.tileset].dictionary,
-            tileWidth: map.tileWidth,
-            tileHeight: map.tileHeight,
-            width: layer.width,
-            height: layer.height,
-            zIndex: layer.zIndex,
-            visible: layer.visible,
             zeroIsBlank: true,
             isometric: false,
-            shadowDistance: {
-              color: '0, 0, 33',
-              distance: 7,
-              darkness: 0.95
-            },
-            lightmap: layer.lightmap
+            tileWidth: map.tileWidth,
+            tileHeight: map.tileHeight
           }));
 
           tileEngine.init(layers);

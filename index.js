@@ -37,7 +37,7 @@ require([
               height: tileset.tileHeight,
               offsetX: tileset.offsetX || 0,
               offsetY: tileset.offsetY || 0,
-              spacing: tileset.spacing || 1
+              spacing: tileset.spacing || 0
             }
           }));
 
@@ -53,6 +53,7 @@ require([
             width: layer.width,
             height: layer.height,
             zIndex: layer.zIndex,
+            visible: layer.visible,
             zeroIsBlank: true,
             isometric: false,
             shadowDistance: {
@@ -112,7 +113,7 @@ require([
         context.clearRect(0, 0, controlWidth, controlHeight);
         for (let i = y; i < yrange; i++) {
           for (let j = x; j < xrange; j++) {
-            mapLayers.filter((layer) => layer.zIndex < PLAYER_Z_INDEX).forEach(function (layer) {
+            mapLayers.filter((layer) => layer.zIndex < PLAYER_Z_INDEX && layer.visible).forEach(function (layer) {
               layer.draw(i, j);
             });
           }
@@ -126,7 +127,7 @@ require([
         }
         for (let i = y; i < yrange; i++) {
           for (let j = x; j < xrange; j++) {
-            mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX).forEach(function (layer) {
+            mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX && layer.visible).forEach(function (layer) {
               layer.draw(i, j);
             });
           }
@@ -145,7 +146,7 @@ require([
           }]).then(function(playerImages) {
             let playerOptions = {
               layer: mapLayers[0],
-              pathfindingLayer: mapLayers[1],
+              pathfindingLayer: mapLayers[2],
               files: playerImages[0].files,
               tileWidth: 32,
               tileHeight: 32,
@@ -156,12 +157,14 @@ require([
             players.push(new Player(context, playerOptions, 2, 3, pathfind));
           });
 
+          layers = layers.sort((a, b) => a.zIndex > b.zIndex);
           for (let i = 0; i < 0 + layers.length; i++) {
             mapLayers[i] = new TileField(context, controlWidth, controlHeight);
             mapLayers[i].setup(layers[i]);
             mapLayers[i].flip("horizontal");
             mapLayers[i].rotate("left");
             mapLayers[i].zIndex = layers[i].zIndex;
+            mapLayers[i].visible = layers[i].visible;
           }
           draw()
         }

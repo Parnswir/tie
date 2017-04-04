@@ -69,7 +69,6 @@ define(() => {
 
         if (inPosX && inPosY) {
           path.shift();
-          movementFrame = 0;
         } else {
           if (!inPosX) {
             let modifier = (targetX - pos.x) / Math.abs(targetX - pos.x);

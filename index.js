@@ -61,7 +61,7 @@ require([
               distance: 7,
               darkness: 0.95
             },
-            lightmap: []
+            lightmap: layer.lightmap
           }));
 
           tileEngine.init(layers);
@@ -125,6 +125,11 @@ require([
             layer.setLight(player.getTile().x, player.getTile().y);
           });
         }
+        // for (let light of lightmap) {
+        // 	mapLayers.forEach(function(layer) {
+        //     layer.setLight(light.x, light.y);
+        //   });
+        // }
         for (let i = y; i < yrange; i++) {
           for (let j = x; j < xrange; j++) {
             mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX && layer.visible).forEach(function (layer) {
@@ -163,6 +168,7 @@ require([
             mapLayers[i].setup(layers[i]);
             mapLayers[i].flip("horizontal");
             mapLayers[i].rotate("left");
+            mapLayers[i].setLightmap(layers[i].lightmap);
             mapLayers[i].zIndex = layers[i].zIndex;
             mapLayers[i].visible = layers[i].visible;
           }

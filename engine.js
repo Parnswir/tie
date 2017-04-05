@@ -22,16 +22,15 @@ define([
     };
   })();
 
-  return function TileEngine(x, y, xrange, yrange) {
+  return function TileEngine(x, y, xrange, yrange, containerName="container") {
     let mapLayers = [];
     let players = [];
 
-    const containerName = "container";
     const container = document.getElementById(containerName);
 
     const controlWidth = container.clientWidth;
     const controlHeight = container.clientHeight;
-    const context = CanvasControl.create("canavas", controlWidth, controlHeight, {}, containerName, true);
+    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, containerName, true);
 
     let backgroundLayers = [];
     let foregroundLayers = [];

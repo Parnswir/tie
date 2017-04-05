@@ -92,44 +92,43 @@ define([
       requestAnimationFrame(draw);
     }
 
-    return {
-      init: function (layers) {
-        imgLoader([{
-          graphics: ["assets/player.png"],
-          spritesheet: {
-            width: 32,
-            height: 32
-          }
-        }]).then(function(playerImages) {
-          let playerOptions = {
-            layer: mapLayers[0],
-            pathfindingLayer: mapLayers[2],
-            files: playerImages[0].files,
-            tileWidth: 32,
-            tileHeight: 32,
-            movementFrameCount: 8,
-            framesPerDirection: 4,
-            speed: 2
-          };
-          players.push(new Player(context, playerOptions, 2, 3, pathfind));
-        });
+    let initLayer = (layer) => {
+      let mapLayer = new TileField(context, controlWidth, controlHeight);
+      mapLayer.setup(layer);
+      mapLayer.flip("horizontal");
+      mapLayer.rotate("left");
+      mapLayer.setLightmap(layer.lightmap);
+      mapLayer.zIndex = layer.zIndex;
+      mapLayer.visible = layer.visible;
+      return mapLayer;
+    }
 
-        layers = layers.sort((a, b) => a.zIndex > b.zIndex);
-        for (let i = 0; i < 0 + layers.length; i++) {
-          mapLayers[i] = new TileField(context, controlWidth, controlHeight);
-          mapLayers[i].setup(layers[i]);
-          mapLayers[i].flip("horizontal");
-          mapLayers[i].rotate("left");
-          mapLayers[i].setLightmap(layers[i].lightmap);
-          mapLayers[i].zIndex = layers[i].zIndex;
-          mapLayers[i].visible = layers[i].visible;
+    this.init = (layers) => {
+      imgLoader([{
+        graphics: ["assets/player.png"],
+        spritesheet: {
+          width: 32,
+          height: 32
         }
-
+      }]).then((playerImages) => {
+        mapLayers = layers.sort((a, b) => a.zIndex > b.zIndex).map(initLayer);
         backgroundLayers = mapLayers.filter((layer) => layer.zIndex < PLAYER_Z_INDEX && layer.visible);
         foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX && layer.visible);
 
+        let playerOptions = {
+          layer: mapLayers[0],
+          pathfindingLayer: mapLayers[2],
+          files: playerImages[0].files,
+          tileWidth: 32,
+          tileHeight: 32,
+          movementFrameCount: 8,
+          framesPerDirection: 4,
+          speed: 2
+        };
+        players.push(new Player(context, playerOptions, 2, 3, pathfind));
+
         draw()
-      }
+      });
     }
   }
 });

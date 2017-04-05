@@ -49,16 +49,16 @@ define([
       let player = players[0];
       if (status) {
         if (pressed === 37) {
-          player.goTo(player.getTile().x - 1, player.getTile().y);
+          player.moveTo(player.getTile().x - 1, player.getTile().y);
         }
         if (pressed === 39) {
-          player.goTo(player.getTile().x + 1, player.getTile().y);
+          player.moveTo(player.getTile().x + 1, player.getTile().y);
         }
         if (pressed === 38) {
-          player.goTo(player.getTile().x, player.getTile().y - 1);
+          player.moveTo(player.getTile().x, player.getTile().y - 1);
         }
         if (pressed === 40) {
-          player.goTo(player.getTile().x, player.getTile().y + 1);
+          player.moveTo(player.getTile().x, player.getTile().y + 1);
         }
       }
     });

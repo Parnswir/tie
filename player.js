@@ -32,6 +32,13 @@ define(() => {
         });
     };
 
+    this.moveTo = function (x, y) {
+      let layout = options.pathfindingLayer.getLayout();
+      if (layout[x][y] === 0) {
+        path = [{x, y}];
+      }
+    }
+
     this.getTile = function () {
       return tile;
     };

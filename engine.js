@@ -37,6 +37,9 @@ define([
     const controlHeight = container.clientHeight;
     const context = CanvasControl.create("canavas", controlWidth, controlHeight, {}, containerName, true);
 
+    let backgroundLayers = [];
+    let foregroundLayers = [];
+
     //CanvasControl.fullScreen();
     const input = new CanvasInput(document, CanvasControl());
 
@@ -65,29 +68,27 @@ define([
       }
     });
 
-    function draw() {
-      context.clearRect(0, 0, controlWidth, controlHeight);
+    let drawLayers = (layers) => {
       for (let i = y; i < yrange; i++) {
         for (let j = x; j < xrange; j++) {
-          mapLayers.filter((layer) => layer.zIndex < PLAYER_Z_INDEX && layer.visible).forEach(function (layer) {
-            layer.draw(i, j);
-          });
+          layers.forEach((layer) => layer.draw(i, j));
         }
       }
+    }
+
+    let setPlayerLighting = (tile) => {
+      mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
+    }
+
+    let draw = () => {
+      context.clearRect(0, 0, controlWidth, controlHeight);
+      drawLayers(backgroundLayers);
       for (let player of players) {
         player.draw();
         player.move();
-        mapLayers.forEach(function(layer) {
-          layer.setLight(player.getTile().x, player.getTile().y);
-        });
+        setPlayerLighting(player.getTile());
       }
-      for (let i = y; i < yrange; i++) {
-        for (let j = x; j < xrange; j++) {
-          mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX && layer.visible).forEach(function (layer) {
-            layer.draw(i, j);
-          });
-        }
-      }
+      drawLayers(foregroundLayers);
       requestAnimationFrame(draw);
     }
 
@@ -123,6 +124,10 @@ define([
           mapLayers[i].zIndex = layers[i].zIndex;
           mapLayers[i].visible = layers[i].visible;
         }
+
+        backgroundLayers = mapLayers.filter((layer) => layer.zIndex < PLAYER_Z_INDEX && layer.visible);
+        foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX && layer.visible);
+
         draw()
       }
     }

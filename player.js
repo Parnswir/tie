@@ -33,9 +33,12 @@ define(() => {
     };
 
     this.moveTo = function (x, y) {
+      let directionFrom = (x, y) => 2 * (x != tile.x) + (x > tile.x) + (y < tile.y);
       let layout = options.pathfindingLayer.getLayout();
       if (layout[x][y] === 0) {
         path = [{x, y}];
+      } else {
+        direction = directionFrom(x, y);
       }
     }
 

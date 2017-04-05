@@ -1,9 +1,5 @@
 const PLAYER_Z_INDEX = 5;
 
-requirejs.config({
-    baseUrl: "./bower_components/JsIso/"
-});
-
 define([
     'jsiso/canvas/Control',
     'jsiso/canvas/Input',

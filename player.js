@@ -16,7 +16,7 @@ define(() => {
     let direction = options.direction || 0;
     let speed = options.speed;
     let path = [];
-    let movementFrame = Math.floor(Math.random() * options.framesPerDirection);
+    let movementFrame = 0;
     let movementFrameTimer = Math.floor(Math.random() * options.movementFrameCount);
 
     let getFrame = () => options.files[options.framesPerDirection * direction + movementFrame];

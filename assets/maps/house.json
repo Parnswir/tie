@@ -6,6 +6,21 @@
   "version": 1,
   "width": 10,
   "height": 10,
+  "characters": {
+    "player": {
+      "x": 7,
+      "y": 8,
+      "direction": 2,
+      "sprites": "assets/player.png",
+      "width": 32,
+      "height": 32,
+      "zIndex": 5,
+      "pathfindingLayer": 2,
+      "movementFrameCount": 8,
+      "framesPerDirection": 4,
+      "speed": 2
+    }
+  },
   "layers":[
     {
       "layout": [

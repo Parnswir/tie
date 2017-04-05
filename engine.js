@@ -1,5 +1,3 @@
-const PLAYER_Z_INDEX = 5;
-
 define([
     'jsiso/canvas/Control',
     'jsiso/canvas/Input',
@@ -98,29 +96,26 @@ define([
       return mapLayer;
     }
 
-    this.init = (layers) => {
+    this.init = (map) => {
+      const player = map.characters["player"];
       imgLoader([{
-        graphics: ["assets/player.png"],
+        graphics: [player.sprites],
         spritesheet: {
-          width: 32,
-          height: 32
+          width: player.width,
+          height: player.height
         }
       }]).then((playerImages) => {
-        mapLayers = layers.sort((a, b) => a.zIndex > b.zIndex).map(initLayer);
-        backgroundLayers = mapLayers.filter((layer) => layer.zIndex < PLAYER_Z_INDEX && layer.visible);
-        foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX && layer.visible);
+        mapLayers = map.layers.sort((a, b) => a.zIndex > b.zIndex).map(initLayer);
+        backgroundLayers = mapLayers.filter((layer) => layer.zIndex < player.zIndex && layer.visible);
+        foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= player.zIndex && layer.visible);
 
-        let playerOptions = {
-          layer: mapLayers[0],
-          pathfindingLayer: mapLayers[2],
-          files: playerImages[0].files,
-          tileWidth: 32,
-          tileHeight: 32,
-          movementFrameCount: 8,
-          framesPerDirection: 4,
-          speed: 2
-        };
-        players.push(new Player(context, playerOptions, 2, 3, pathfind));
+        player.files = playerImages[0].files;
+        player.layer = mapLayers[0];
+        player.pathfindingLayer = mapLayers[player.pathfindingLayer];
+        player.tileWidth = map.tileWidth;
+        player.tileHeight = map.tileHeight;
+
+        players.push(new Player(context, player, player.x, player.y, pathfind));
 
         draw()
       });

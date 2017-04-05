@@ -114,11 +114,6 @@ require([
             layer.setLight(player.getTile().x, player.getTile().y);
           });
         }
-        // for (let light of lightmap) {
-        // 	mapLayers.forEach(function(layer) {
-        //     layer.setLight(light.x, light.y);
-        //   });
-        // }
         for (let i = y; i < yrange; i++) {
           for (let j = x; j < xrange; j++) {
             mapLayers.filter((layer) => layer.zIndex >= PLAYER_Z_INDEX && layer.visible).forEach(function (layer) {

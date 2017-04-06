@@ -47,7 +47,12 @@
 	visibility: hidden;
 }
 
-.text-frame.in>#text-indicator {
+#text-indicator.in {
 	visibility: visible;
 	transition: visibility .3s step-end;
+	animation: blinking 1.5s linear infinite;
+}
+
+@keyframes blinking {  
+	50% { opacity: 0; }
 }

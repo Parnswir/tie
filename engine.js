@@ -20,11 +20,17 @@ define([
     };
   })();
 
-  return function TileEngine(x, y, xrange, yrange, containerName="container") {
+  return function TileEngine(x, y, xrange, yrange, containerName="container", textOptions={}) {
+    let paused = false;
     let mapLayers = [];
     let players = [];
 
     const container = document.getElementById(containerName);
+
+    let textMessages = [];
+    const textMessageFrame = document.getElementById(textOptions.textMessageFrameName || "text-frame");
+    const textMessage = document.getElementById(textOptions.textMessageName || "text-message");
+    const textIndicator = document.getElementById(textOptions.textIndicatorName || "text-indicator")
 
     const controlWidth = container.clientWidth;
     const controlHeight = container.clientHeight;
@@ -46,20 +52,65 @@ define([
     input.keyboard(function(pressed, status) {
       let player = players[0];
       if (status) {
-        if (pressed === 37) {
-          player.moveTo(player.getTile().x - 1, player.getTile().y);
-        }
-        if (pressed === 39) {
-          player.moveTo(player.getTile().x + 1, player.getTile().y);
-        }
-        if (pressed === 38) {
-          player.moveTo(player.getTile().x, player.getTile().y - 1);
-        }
-        if (pressed === 40) {
-          player.moveTo(player.getTile().x, player.getTile().y + 1);
+        if (paused) {
+          drawMessages();
+        } else {
+          if (pressed === 37) {
+            player.moveTo(player.getTile().x - 1, player.getTile().y);
+          }
+          if (pressed === 39) {
+            player.moveTo(player.getTile().x + 1, player.getTile().y);
+          }
+          if (pressed === 38) {
+            player.moveTo(player.getTile().x, player.getTile().y - 1);
+          }
+          if (pressed === 40) {
+            player.moveTo(player.getTile().x, player.getTile().y + 1);
+          }
         }
       }
     });
+
+    let pause = () => {
+      paused = true;
+    }
+
+    let unpause = () => {
+      paused = false;
+      draw();
+    }
+
+    let clearText = () => {
+      textMessages = [];
+      textMessageFrame.classList.remove("in");
+      textMessage.innerHTML = "";
+      textIndicator.classList.remove("in");
+      if (paused) {
+        unpause();
+      }
+    }
+
+    let displayText = (text) => {
+      textMessages = textMessages.concat(text);
+    }
+
+    let drawMessages = () => {
+      if (textMessages.length > 0) {
+        pause();
+        let text = textMessages.splice(0, 1)[0];
+        textMessage.innerHTML = text;
+        if (!("in" in textMessageFrame.classList)) {
+          textMessageFrame.classList.add("in");
+        }
+        if (textMessages.length >= 1) {
+          textIndicator.classList.add("in");
+        } else {
+          textIndicator.classList.remove("in");
+        }
+      } else {
+        clearText();
+      }
+    }
 
     let drawLayers = (layers) => {
       for (let i = y; i < yrange; i++) {
@@ -82,7 +133,10 @@ define([
         setPlayerLighting(player.getTile());
       }
       drawLayers(foregroundLayers);
-      requestAnimationFrame(draw);
+      drawMessages();
+      if (!paused) {
+        requestAnimationFrame(draw);
+      }
     }
 
     let initLayer = (layer) => {
@@ -118,6 +172,7 @@ define([
         players.push(new Player(context, player, player.x, player.y, pathfind));
 
         draw()
+        displayText(["Hello World!", "This is the second text."])
       });
     }
   }

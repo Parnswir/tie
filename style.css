@@ -4,3 +4,50 @@
 	width: 320px;
 	height: 320px;
 }
+
+.text-frame {
+	position: relative;
+	width: 318px;
+	top: 0em;
+	height: 0em;
+	transition: top .3s, height .3s, visibility .3s;
+
+	display: flex;
+	flex-direction: column;
+	overflow: none;
+
+	border-style: solid;
+	border-width: 2px;
+	background: white;
+}
+
+.text-frame.in {
+	top: -2.7em;
+	height: 2.7em;
+	border-radius: 4px 4px 0 0;
+	transition: top .3s, height .3s, visibility 0s;
+}
+
+.text-message {
+	font-family: Lato;
+	margin: 2px 14px 0 4px;
+	visibility: hidden;
+}
+
+.text-frame.in>.text-message {
+	visibility: visible;
+	transition: visibility .3s step-end;
+}
+
+#text-indicator {
+	position: relative;
+	margin-left: auto;
+	right: 4px;
+	top: -1em;
+	visibility: hidden;
+}
+
+.text-frame.in>#text-indicator {
+	visibility: visible;
+	transition: visibility .3s step-end;
+}

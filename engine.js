@@ -82,19 +82,15 @@ define([
       let player = players[0];
       if (status) {
         if (paused) {
-          drawMessages();
+          if ([13, 32].indexOf(pressed) >= 0) {
+            drawMessages();
+          }
         } else {
-          if (pressed === 37) {
-            player.moveTo(player.getTile().x - 1, player.getTile().y);
-          }
-          if (pressed === 39) {
-            player.moveTo(player.getTile().x + 1, player.getTile().y);
-          }
-          if (pressed === 38) {
-            player.moveTo(player.getTile().x, player.getTile().y - 1);
-          }
-          if (pressed === 40) {
-            player.moveTo(player.getTile().x, player.getTile().y + 1);
+          switch (pressed) {
+            case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;
+            case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
+            case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
+            case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
           }
         }
       }

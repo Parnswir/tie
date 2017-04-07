@@ -20,24 +20,53 @@ define([
     };
   })();
 
-  return function TileEngine(x, y, xrange, yrange, containerName="container", textOptions={}) {
-    let paused = false;
-    let mapLayers = [];
-    let players = [];
+  const ELEMENT_NAMES = {
+    containerName: 'container',
+    frameName: 'text-frame',
+    messageName: 'text-message',
+    indicatorName: 'text-indicator'
+  };
 
-    const container = document.getElementById(containerName);
+  let appendHtml = (el, str) => {
+    let div = document.createElement('div');
+    div.innerHTML = str;
+    while (div.children.length > 0) {
+      el.appendChild(div.children[0]);
+    }
+  }
+
+  let createElements = (container, names) => {
+    let elements = '\
+      <div id="' + names.containerName + '"></div>\
+      <div class="text-frame" id="' + names.frameName + '">\
+        <span class="text-message" id="' + names.messageName + '"></span>\
+        <span id="' + names.indicatorName + '">▼</span>\
+      </div>\
+    ';
+    appendHtml(container, elements);
+  }
+
+  return function TileEngine(x, y, xrange, yrange, parent=document.body, overrides) {
+    overrides = overrides || {};
+    let elementNames = overrides.elementNames || ELEMENT_NAMES;
+    createElements(parent, elementNames);
+    const container = document.getElementById(elementNames.containerName);
 
     let textMessages = [];
-    const textMessageFrame = document.getElementById(textOptions.textMessageFrameName || "text-frame");
-    const textMessage = document.getElementById(textOptions.textMessageName || "text-message");
-    const textIndicator = document.getElementById(textOptions.textIndicatorName || "text-indicator")
+    const textMessageFrame = document.getElementById(elementNames.frameName);
+    const textMessage = document.getElementById(elementNames.messageName);
+    const textIndicator = document.getElementById(elementNames.indicatorName)
 
     const controlWidth = container.clientWidth;
     const controlHeight = container.clientHeight;
-    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, containerName, true);
+    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, elementNames.containerName, true);
 
     let backgroundLayers = [];
     let foregroundLayers = [];
+
+    let paused = false;
+    let mapLayers = [];
+    let players = [];
 
     //CanvasControl.fullScreen();
     const input = new CanvasInput(document, CanvasControl());

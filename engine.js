@@ -5,9 +5,10 @@ define([
     'jsiso/json/load',
     'jsiso/tile/Field',
     'jsiso/pathfind/pathfind',
-    '../../player'
+    '../../player',
+    '../../action'
   ],
-  (CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, Player) => {
+  (CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, Player, Action) => {
 
   let requestAnimFrame = (function() {
     return window.requestAnimationFrame ||
@@ -47,7 +48,9 @@ define([
   }
 
   return function TileEngine(x, y, xrange, yrange, parent=document.body, overrides) {
+    let self = this;
     overrides = overrides || {};
+
     let elementNames = overrides.elementNames || ELEMENT_NAMES;
     createElements(parent, elementNames);
     const container = document.getElementById(elementNames.containerName);
@@ -91,10 +94,22 @@ define([
             case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
             case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
             case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
+            case 13: case 32: interact(player, player.getLookedAtTile()); break;
           }
         }
       }
     });
+
+    let interact = (player, tile) => {
+      if (!player.isMoving()) {
+        let layers = mapLayers.filter((layer) => layer.zIndex === player.properties.zIndex);
+        let actions = [];
+        layers.forEach((layer) => actions = actions.concat(layer.actions));
+        actions
+          .filter((action) => action.x === tile.x && action.y == tile.y)
+          .forEach((action) => (new Action(action)).execute(self, player));
+      }
+    };
 
     let pause = () => {
       paused = true;
@@ -115,7 +130,7 @@ define([
       }
     }
 
-    let displayText = (text) => {
+    this.displayText = (text) => {
       textMessages = textMessages.concat(text);
     }
 
@@ -170,8 +185,7 @@ define([
       mapLayer.flip("horizontal");
       mapLayer.rotate("left");
       mapLayer.setLightmap(layer.lightmap);
-      mapLayer.zIndex = layer.zIndex;
-      mapLayer.visible = layer.visible;
+      mapLayer = Object.assign(mapLayer, layer);
       return mapLayer;
     }
 
@@ -196,7 +210,7 @@ define([
 
         players.push(new Player(context, player, player.x, player.y, pathfind));
 
-        draw()
+        draw();
       });
     }
   }

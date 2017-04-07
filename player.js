@@ -6,6 +6,8 @@ define(() => {
     options.movementFrameCount = options.movementFrameCount || 8;
     options.framesPerDirection = options.framesPerDirection || 4;
     options.speed = options.speed || 1;
+    
+    this.properties = options;
 
     let tile = {x, y};
     let pos = {
@@ -42,8 +44,19 @@ define(() => {
       }
     }
 
+    this.isMoving = () => path.length > 0;
+
     this.getTile = function () {
       return tile;
+    };
+
+    this.getLookedAtTile = function () {
+      switch (direction) {
+        case 0: return {x: tile.x, y: tile.y + 1};
+        case 1: return {x: tile.x, y: tile.y - 1};
+        case 2: return {x: tile.x - 1, y: tile.y};
+        case 3: return {x: tile.x + 1, y: tile.y};
+      }
     };
 
     this.draw = function () {

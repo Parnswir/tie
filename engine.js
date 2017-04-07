@@ -197,7 +197,6 @@ define([
         players.push(new Player(context, player, player.x, player.y, pathfind));
 
         draw()
-        displayText(["Hello World!", "This is the second text."])
       });
     }
   }

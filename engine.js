@@ -165,7 +165,7 @@ define([
     }
 
     let previousTime = 0;
-    let timeToDraw = (time) => !overrides.lockFramerate || (time - previousTime) >= 30;
+    let timeToDraw = (time) => !overrides.lockedFrameRate || (time - previousTime) >= 1000 / overrides.lockedFrameRate;
 
     let draw = (time) => {
       if (!timeToDraw(time)) {

@@ -222,6 +222,7 @@ define([
         player.on("changeTile", (tile) => {
           console.log(tile);
         });
+        player.on("pathComplete", (p) => console.log("Path complete", p.getPath()))
 
         players.push(player);
 

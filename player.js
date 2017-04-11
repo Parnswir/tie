@@ -15,9 +15,14 @@ define(() => {
       y: tile.y * options.tileHeight + options.files[0].width / 2
     };
 
-    let direction = options.direction || 0;
     let speed = options.speed;
+    let direction = options.direction || 0;
+    this.getDirection = () => direction;
+    this.setDirection = (where) => direction = where % 4;
+    
     let path = [];
+    this.getPath = () => path;
+
     let movementFrame = 0;
     let movementFrameTimer = Math.floor(Math.random() * options.movementFrameCount);
 
@@ -88,14 +93,6 @@ define(() => {
       context.drawImage(getFrame(), getFrameX(offset), getFrameY(offset));
     };
 
-    this.getDirection = function () {
-      return direction;
-    };
-
-    this.setDirection = function (where) {
-      direction = where % 4;
-    };
-
     let previousTile = tile;
     this.move = function () {
       if (path.length > 0) {
@@ -117,6 +114,7 @@ define(() => {
 
         if (inPosX && inPosY) {
           path.shift();
+          createEvent("pathComplete", this);
         } else {
           if (!inPosX) {
             let modifier = (targetX - pos.x) / Math.abs(targetX - pos.x);
@@ -137,6 +135,6 @@ define(() => {
       }
     };
 
-    this.id = options.id
+    this.id = options.id;
   }
 });

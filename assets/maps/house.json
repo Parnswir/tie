@@ -50,12 +50,7 @@
         [2, 1, 6, 2],
         [7, 0, 6, 2],
         [7, 1, 6, 2]
-      ],
-      "shadowDistance": {
-        "color": "0, 0, 33",
-        "distance": 7,
-        "darkness": 0.95
-      }
+      ]
     },
     {
       "height": 10,
@@ -92,12 +87,7 @@
         [2, 1, 6, 2],
         [7, 0, 6, 2],
         [7, 1, 6, 2]
-      ],
-      "shadowDistance": {
-        "color": "0, 0, 33",
-        "distance": 7,
-        "darkness": 0.95
-      }
+      ]
     },
     {
       "height": 10,

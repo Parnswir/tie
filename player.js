@@ -25,6 +25,30 @@ define(() => {
     let getFrameX = (offset) => pos.x - options.files[0].width / 2 + offset.x;
     let getFrameY = (offset) => pos.y - options.files[0].height / 2 + offset.y;
 
+    let handlers = {};
+    this.on = (event, handler) => {
+      if (!handlers[event]) {
+        handlers[event] = [];
+      }
+      let id = Date.now();
+      handlers[event].push({id, handler});
+      return id;
+    };
+
+    this.off = (event, id) => {
+      let h = handlers[event];
+      if (h) {
+        h.filter((e) => e.id == id).forEach((element) => h.splice(h.indexOf(element), 1));
+      }
+    };
+
+    let createEvent = (name, event) => {
+      let h = handlers[name];
+      if (h) {
+        h.forEach((entry) => entry.handler(event));
+      }
+    }
+
     this.goTo = function (x, y) {
       pathfind(options.id, [tile.x, tile.y], [x, y], options.pathfindingLayer.getLayout(), false, false)
         .then(function (data) {
@@ -72,6 +96,7 @@ define(() => {
       direction = where % 4;
     };
 
+    let previousTile = tile;
     this.move = function () {
       if (path.length > 0) {
         movementFrameTimer++;
@@ -106,6 +131,10 @@ define(() => {
         }
       }
       tile = options.layer.getXYCoords(pos.x, pos.y);
+      if (tile.x !== previousTile.x || tile.y !== previousTile.y) {
+        createEvent("changeTile", tile);
+        previousTile = tile;
+      }
     };
 
     this.id = options.id

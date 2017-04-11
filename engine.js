@@ -200,25 +200,30 @@ define([
     }
 
     this.init = (map) => {
-      const player = map.characters["player"];
+      let playerOptions = map.characters["player"];
       imgLoader([{
-        graphics: [player.sprites],
+        graphics: [playerOptions.sprites],
         spritesheet: {
-          width: player.width,
-          height: player.height
+          width: playerOptions.width,
+          height: playerOptions.height
         }
       }]).then((playerImages) => {
         mapLayers = map.layers.sort((a, b) => a.zIndex > b.zIndex).map(initLayer);
-        backgroundLayers = mapLayers.filter((layer) => layer.zIndex < player.zIndex && layer.visible);
-        foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= player.zIndex && layer.visible);
+        backgroundLayers = mapLayers.filter((layer) => layer.zIndex < playerOptions.zIndex && layer.visible);
+        foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= playerOptions.zIndex && layer.visible);
 
-        player.files = playerImages[0].files;
-        player.layer = mapLayers[0];
-        player.pathfindingLayer = mapLayers[player.pathfindingLayer];
-        player.tileWidth = map.tileWidth;
-        player.tileHeight = map.tileHeight;
+        playerOptions.files = playerImages[0].files;
+        playerOptions.layer = mapLayers[0];
+        playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer];
+        playerOptions.tileWidth = map.tileWidth;
+        playerOptions.tileHeight = map.tileHeight;
 
-        players.push(new Player(context, player, player.x, player.y, pathfind));
+        let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
+        player.on("changeTile", (tile) => {
+          console.log(tile);
+        });
+
+        players.push(player);
 
         draw();
       });

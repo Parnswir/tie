@@ -49,9 +49,9 @@ define([
 
   return function TileEngine(x, y, xrange, yrange, parent=document.body, overrides) {
     let self = this;
-    overrides = overrides || {};
+    overrides = Object.assign({}, overrides);
 
-    let elementNames = overrides.elementNames || ELEMENT_NAMES;
+    let elementNames = Object.assign(ELEMENT_NAMES, overrides.elementNames);
     createElements(parent, elementNames);
     const container = document.getElementById(elementNames.containerName);
 
@@ -164,18 +164,26 @@ define([
       mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
     }
 
-    let draw = () => {
-      context.clearRect(0, 0, controlWidth, controlHeight);
-      drawLayers(backgroundLayers);
-      for (let player of players) {
-        player.draw();
-        player.move();
-        setPlayerLighting(player.getTile());
-      }
-      drawLayers(foregroundLayers);
-      drawMessages();
-      if (!paused) {
+    let previousTime = 0;
+    let timeToDraw = (time) => !overrides.lockFramerate || (time - previousTime) >= 30;
+
+    let draw = (time) => {
+      if (!timeToDraw(time)) {
         requestAnimationFrame(draw);
+      } else {
+        previousTime = time; 
+        context.clearRect(0, 0, controlWidth, controlHeight);
+        drawLayers(backgroundLayers);
+        for (let player of players) {
+          player.draw();
+          player.move();
+          setPlayerLighting(player.getTile());
+        }
+        drawLayers(foregroundLayers);
+        drawMessages();
+        if (!paused) {
+          requestAnimationFrame(draw);
+        }
       }
     }
 

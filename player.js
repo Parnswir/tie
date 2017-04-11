@@ -18,7 +18,10 @@ define(() => {
     let speed = options.speed;
     let direction = options.direction || 0;
     this.getDirection = () => direction;
-    this.setDirection = (where) => direction = where % 4;
+    this.setDirection = (where) => {
+      direction = where % 4;
+      createEvent("setDirection", direction);
+    }
     
     let path = [];
     this.getPath = () => path;
@@ -47,14 +50,16 @@ define(() => {
       }
     };
 
-    let createEvent = (name, event) => {
+    let createEvent = function (name, event) {
+      let _this = this;
       let h = handlers[name];
       if (h) {
-        h.forEach((entry) => entry.handler(event));
+        h.forEach((entry) => entry.handler(_this, event));
       }
     }
 
     this.goTo = function (x, y) {
+      createEvent("goTo", {x, y});
       pathfind(options.id, [tile.x, tile.y], [x, y], options.pathfindingLayer.getLayout(), false, false)
         .then(function (data) {
           if (data.length > 0 && data[1] !== undefined) {
@@ -69,15 +74,12 @@ define(() => {
       if (layout[x][y] === 0) {
         path = [{x, y}];
       } else {
-        direction = directionFrom(x, y);
+        this.setDirection(directionFrom(x, y));
       }
     }
 
     this.isMoving = () => path.length > 0;
-
-    this.getTile = function () {
-      return tile;
-    };
+    this.getTile = () => tile;
 
     this.getLookedAtTile = function () {
       switch (direction) {
@@ -114,16 +116,16 @@ define(() => {
 
         if (inPosX && inPosY) {
           path.shift();
-          createEvent("pathComplete", this);
+          createEvent("pathComplete", path);
         } else {
           if (!inPosX) {
             let modifier = (targetX - pos.x) / Math.abs(targetX - pos.x);
-            direction = modifier > 0 ? 3 : 2;
+            this.setDirection(modifier > 0 ? 3 : 2);
             pos.x += modifier * speed;
           }
           if (!inPosY) {
             let modifier = (targetY - pos.y) / Math.abs(targetY - pos.y);
-            direction = modifier > 0 ? 0 : 1;
+            this.setDirection(modifier > 0 ? 0 : 1);
             pos.y += modifier * speed;
           }
         }

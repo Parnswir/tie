@@ -219,10 +219,10 @@ define([
         playerOptions.tileHeight = map.tileHeight;
 
         let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
-        player.on("changeTile", (tile) => {
+        player.on("changeTile", (p, tile) => {
           console.log(tile);
         });
-        player.on("pathComplete", (p) => console.log("Path complete", p.getPath()))
+        player.on("pathComplete", (p, path) => console.log("Path complete", path))
 
         players.push(player);
 

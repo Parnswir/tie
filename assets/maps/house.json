@@ -83,12 +83,15 @@
         },
         {
           "x": 8, "y": 4,
-          "type": "text",
-          "text": "I can't go outside yet. The engine does not support it!",
+          "type": "positional",
           "next": {
-            "type": "move",
-            "entity": "player",
-            "target": {"x": 7, "y": 4}
+            "type": "text",
+            "text": "I can't go outside yet. The engine does not support it!",
+            "next": {
+              "type": "move",
+              "entity": "player",
+              "target": {"x": 7, "y": 4}
+            }
           }
         }
       ],

@@ -102,12 +102,20 @@ define([
       }
     });
 
+    let getActions = (player=null) => {
+      let layers = mapLayers;
+      if (player !== null) {
+        layers = layers.filter((layer) => layer.zIndex === player.properties.zIndex);
+      }
+      let actions = [];
+      layers.forEach((layer) => actions = actions.concat(layer.actions || []));
+      return actions;
+    }
+
     let interact = (player, tile) => {
       if (!player.isMoving()) {
-        let layers = mapLayers.filter((layer) => layer.zIndex === player.properties.zIndex);
-        let actions = [];
-        layers.forEach((layer) => actions = actions.concat(layer.actions));
-        actions
+        getActions(player)
+          .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
           .filter((action) => action.x === tile.x && action.y == tile.y)
           .forEach((action) => actionExecutor.execute(action, self, player));
       }
@@ -220,9 +228,12 @@ define([
 
         let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
         player.on("changeTile", (p, tile) => {
-          console.log(tile);
+          getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+            if (action.x === tile.x && action.y === tile.y) {
+              actionExecutor.execute(action, self, p);
+            }
+          })
         });
-        player.on("pathComplete", (p, path) => console.log("Path complete", path))
 
         players.push(player);
 

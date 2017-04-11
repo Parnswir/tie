@@ -1,5 +1,6 @@
 define(() => {
   return function Player(context, properties, x=0, y=0, pathfind) {
+    let self = this;
     let options = properties;
     options.tileWidth = options.tileWidth || 32;
     options.tileHeight = options.tileHeight || 32;
@@ -51,10 +52,9 @@ define(() => {
     };
 
     let createEvent = function (name, event) {
-      let _this = this;
       let h = handlers[name];
       if (h) {
-        h.forEach((entry) => entry.handler(_this, event));
+        h.forEach((entry) => entry.handler(self, event));
       }
     }
 

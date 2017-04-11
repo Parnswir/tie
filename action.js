@@ -2,6 +2,8 @@ define(() => {
 
   return function ActionExecutor() {
     let actions = {};
+
+    this.TYPE_POSITIONAL = "positional";
     
     this.registerAction = function (type, execute, override=false) {
       if (override || !actions[type]) {
@@ -12,7 +14,10 @@ define(() => {
     }
 
     this.execute = function (options, engine, player) {
-      actions[options.type](options, engine, player);
+      let executor = actions[options.type];
+      if (executor) {
+        executor(options, engine, player);
+      }
       if (options.next) {
         this.execute(options.next, engine, player);
       }

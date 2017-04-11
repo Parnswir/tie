@@ -8,7 +8,7 @@ define([
     '../../player',
     '../../action'
   ],
-  (CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, Player, Action) => {
+  (CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, Player, ActionExecutor) => {
 
   let requestAnimFrame = (function() {
     return window.requestAnimationFrame ||
@@ -71,6 +71,8 @@ define([
     let mapLayers = [];
     let players = [];
 
+    let actionExecutor = new ActionExecutor();
+
     //CanvasControl.fullScreen();
     const input = new CanvasInput(document, CanvasControl());
 
@@ -107,7 +109,7 @@ define([
         layers.forEach((layer) => actions = actions.concat(layer.actions));
         actions
           .filter((action) => action.x === tile.x && action.y == tile.y)
-          .forEach((action) => (new Action(action)).execute(self, player));
+          .forEach((action) => actionExecutor.execute(action, self, player));
       }
     };
 

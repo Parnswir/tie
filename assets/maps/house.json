@@ -80,6 +80,16 @@
           "x": 5, "y": 8, 
           "type": "text", 
           "text": "I like this plant.\nI think I have a green thumb!"
+        },
+        {
+          "x": 8, "y": 4,
+          "type": "text",
+          "text": "I can't go outside yet. The engine does not support it!",
+          "next": {
+            "type": "move",
+            "entity": "player",
+            "target": {"x": 7, "y": 4}
+          }
         }
       ],
       "lightmap": [

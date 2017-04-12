@@ -77,10 +77,14 @@ define([
     const input = new CanvasInput(document, CanvasControl());
 
     input.mouse_action(function(coords) {
-      mapLayers.map(function(layer) {
+      if (paused) {
+        drawMessages()
+      } else {
+        let player = players[0];
+        let layer = player.properties.layer;
         let t = layer.applyMouseFocus(coords.x, coords.y);
-        players[0].goTo(t.x, t.y);
-      });
+        player.goTo(t.x, t.y);
+      }
     });
 
     input.keyboard(function(pressed, status) {

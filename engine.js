@@ -84,6 +84,9 @@ define([
         let layer = player.properties.layer;
         let t = layer.applyMouseFocus(coords.x, coords.y);
         player.goTo(t.x, t.y);
+        if (Math.abs(t.x - player.getTile().x) + Math.abs(t.y - player.getTile().y) === 1) {
+          interact(player, t);
+        }
       }
     });
 

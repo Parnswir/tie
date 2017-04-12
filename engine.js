@@ -90,6 +90,12 @@ define([
       }
     });
 
+    textMessageFrame.onclick = () => {
+      if (paused) {
+        drawMessages();
+      }
+    };
+
     input.keyboard(function(pressed, status) {
       let player = players[0];
       if (status) {

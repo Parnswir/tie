@@ -93,6 +93,19 @@
               "target": {"x": 7, "y": 4}
             }
           }
+        },
+        {
+          "x": 8, "y": 5,
+          "type": "positional",
+          "next": {
+            "type": "text",
+            "text": "I can't go outside yet. The engine does not support it!",
+            "next": {
+              "type": "move",
+              "entity": "player",
+              "target": {"x": 7, "y": 5}
+            }
+          }
         }
       ],
       "lightmap": [

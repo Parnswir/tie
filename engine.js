@@ -72,6 +72,15 @@ define([
     let players = [];
 
     let actionExecutor = new ActionExecutor();
+    actionExecutor.registerAction('toggleTile', (options, engine, player) => {
+      let layers = mapLayers.filter((layer) => layer.zIndex === player.properties.zIndex);
+      layers.forEach((layer) => {
+        let currentTile = layer.getTile(options.target.x, options.target.y);
+        let currentIndex = options.tiles.indexOf(currentTile);
+        layer.setTile(options.target.x, options.target.y, options.tiles[(currentIndex + 1) % options.tiles.length]);
+      })
+      draw();
+    });
 
     //CanvasControl.fullScreen();
     const input = new CanvasInput(document, CanvasControl());

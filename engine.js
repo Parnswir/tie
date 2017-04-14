@@ -79,7 +79,6 @@ define([
         let currentIndex = options.tiles.indexOf(currentTile);
         layer.setTile(options.target.x, options.target.y, options.tiles[(currentIndex + 1) % options.tiles.length]);
       })
-      draw();
     });
 
     //CanvasControl.fullScreen();

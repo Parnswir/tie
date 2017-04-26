@@ -147,8 +147,10 @@ define([
     }
 
     let unpause = () => {
-      paused = false;
-      draw();
+      if (paused) {
+        paused = false;
+        draw();
+      }
     }
 
     let clearText = () => {

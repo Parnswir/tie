@@ -163,7 +163,7 @@ define([
       }
     }
 
-    this.displayText = (text) => {
+    let displayText = (text) => {
       textMessages = textMessages.concat(text);
     }
 
@@ -230,7 +230,7 @@ define([
       return mapLayer;
     }
 
-    this.init = (map) => {
+    let init = (map) => {
       let playerOptions = map.characters["player"];
       imgLoader([{
         graphics: [playerOptions.sprites],
@@ -263,5 +263,12 @@ define([
         draw();
       });
     }
+
+    this.init = init;
+    this.displayText = displayText;
+    this.pause = pause;
+    this.unpause = unpause;
+
+    this.actionExecutor = actionExecutor;
   }
 });

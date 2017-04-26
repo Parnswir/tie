@@ -5,8 +5,8 @@ define([
     'jsiso/json/load',
     'jsiso/tile/Field',
     'jsiso/pathfind/pathfind',
-    '../../player',
-    '../../action'
+    './player',
+    './action'
   ],
   (CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, Player, ActionExecutor) => {
 

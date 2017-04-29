@@ -34,12 +34,14 @@ THE SOFTWARE.
     - 1 or bigger = block
 
 ***/
+import PathWorker from 'worker-loader!./worker';
+
 var workers = [];
 
 export default function (id, start, end, map, diagonal, force) {
 
   if (workers[id] === undefined) {
-    workers[id] = (new Worker('worker.js?' + Math.random()));
+    workers[id] = new PathWorker();
   }
 
   return new Promise(function(resolve, reject) {

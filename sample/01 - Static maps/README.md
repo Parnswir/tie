@@ -113,3 +113,18 @@ Then we define the actual layout of the tiles. Each location on the map (from [x
 ![screenshot](screenshot.jpg)
 
 And that's it.
+
+
+## What to do next?
+
+### Try creating multiple tile sets
+
+Note that you have to adapt the `firstgid` option of the second tile set to start after the first ended.
+
+### Try creating more layers
+
+Or read the [second tutorial](../02%20-%20Layers) on what to do with them.
+
+### Ready for your own adventure?
+
+Go back to the [main page](../../).

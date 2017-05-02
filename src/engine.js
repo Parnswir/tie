@@ -34,14 +34,15 @@ let appendHtml = (el, str) => {
   }
 }
 
-let createElements = (container, names) => {
-  let elements = '\
-    <div id="' + names.containerName + '"></div>\
-    <div class="text-frame" id="' + names.frameName + '">\
-      <span class="text-message" id="' + names.messageName + '"></span>\
-      <span id="' + names.indicatorName + '">▼</span>\
-    </div>\
-  ';
+let createElements = (container, names, outputEnabled=false) => {
+  let elements = '<div id="' + names.containerName + '"></div>';
+  if (outputEnabled) {
+    elements += '\
+      <div class="text-frame" id="' + names.frameName + '">\
+        <span class="text-message" id="' + names.messageName + '"></span>\
+        <span id="' + names.indicatorName + '">▼</span>\
+      </div>';
+  }
   appendHtml(container, elements);
 }
 
@@ -49,8 +50,10 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
   let self = this;
   overrides = Object.assign({}, overrides);
 
-  let elementNames = Object.assign(ELEMENT_NAMES, overrides.elementNames);
-  createElements(parent, elementNames);
+  let elementNames = Object.assign(ELEMENT_NAMES, overrides.customElementNames);
+  if (!overrides.useCustomElements) {
+    createElements(parent, elementNames, overrides.enableTextOutput);
+  }
   const container = document.getElementById(elementNames.containerName);
 
   let textMessages = [];
@@ -96,11 +99,49 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     }
   });
 
-  textMessageFrame.onclick = () => {
-    if (paused) {
-      drawMessages();
+  let clearText = function () {};
+  let displayText = function () {};
+  let drawMessages = function () {};
+
+  if (overrides.enableTextOutput) {
+    textMessageFrame.onclick = () => {
+      if (paused) {
+        drawMessages();
+      }
+    };
+
+    clearText = () => {
+      textMessages = [];
+      textMessageFrame.classList.remove("in");
+      textMessage.innerHTML = "";
+      textIndicator.classList.remove("in");
+      if (paused) {
+        unpause();
+      }
     }
-  };
+
+    displayText = (text) => {
+      textMessages = textMessages.concat(text);
+    }
+
+    drawMessages = () => {
+      if (textMessages.length > 0) {
+        pause();
+        let text = textMessages.splice(0, 1)[0];
+        textMessage.innerHTML = text;
+        if (!("in" in textMessageFrame.classList)) {
+          textMessageFrame.classList.add("in");
+        }
+        if (textMessages.length >= 1) {
+          textIndicator.classList.add("in");
+        } else {
+          textIndicator.classList.remove("in");
+        }
+      } else {
+        clearText();
+      }
+    }
+  }
 
   input.keyboard(function(pressed, status) {
     let player = players[0];
@@ -148,38 +189,6 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     if (paused) {
       paused = false;
       draw();
-    }
-  }
-
-  let clearText = () => {
-    textMessages = [];
-    textMessageFrame.classList.remove("in");
-    textMessage.innerHTML = "";
-    textIndicator.classList.remove("in");
-    if (paused) {
-      unpause();
-    }
-  }
-
-  let displayText = (text) => {
-    textMessages = textMessages.concat(text);
-  }
-
-  let drawMessages = () => {
-    if (textMessages.length > 0) {
-      pause();
-      let text = textMessages.splice(0, 1)[0];
-      textMessage.innerHTML = text;
-      if (!("in" in textMessageFrame.classList)) {
-        textMessageFrame.classList.add("in");
-      }
-      if (textMessages.length >= 1) {
-        textIndicator.classList.add("in");
-      } else {
-        textIndicator.classList.remove("in");
-      }
-    } else {
-      clearText();
     }
   }
 

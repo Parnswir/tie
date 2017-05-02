@@ -82,23 +82,6 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     })
   });
 
-  //CanvasControl.fullScreen();
-  const input = new CanvasInput(document, CanvasControl());
-
-  input.mouse_action(function(coords) {
-    if (paused) {
-      drawMessages()
-    } else {
-      let player = players[0];
-      let layer = player.properties.layer;
-      let t = layer.applyMouseFocus(coords.x, coords.y);
-      player.goTo(t.x, t.y);
-      if (Math.abs(t.x - player.getTile().x) + Math.abs(t.y - player.getTile().y) === 1) {
-        interact(player, t);
-      }
-    }
-  });
-
   let clearText = function () {};
   let displayText = function () {};
   let drawMessages = function () {};
@@ -143,24 +126,43 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     }
   }
 
-  input.keyboard(function(pressed, status) {
-    let player = players[0];
-    if (status) {
+  const input = new CanvasInput(document, CanvasControl());
+  if (overrides.enableMouseInput) {
+    input.mouse_action(function(coords) {
       if (paused) {
-        if ([13, 32].indexOf(pressed) >= 0) {
-          drawMessages();
-        }
+        drawMessages()
       } else {
-        switch (pressed) {
-          case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;
-          case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
-          case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
-          case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
-          case 13: case 32: interact(player, player.getLookedAtTile()); break;
+        let player = players[0];
+        let layer = player.properties.layer;
+        let t = layer.applyMouseFocus(coords.x, coords.y);
+        player.goTo(t.x, t.y);
+        if (Math.abs(t.x - player.getTile().x) + Math.abs(t.y - player.getTile().y) === 1) {
+          interact(player, t);
         }
       }
-    }
-  });
+    });
+  }
+
+  if (overrides.enableKeyboardInput) {
+    input.keyboard(function(pressed, status) {
+      let player = players[0];
+      if (status) {
+        if (paused) {
+          if ([13, 32].indexOf(pressed) >= 0) {
+            drawMessages();
+          }
+        } else {
+          switch (pressed) {
+            case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;
+            case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
+            case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
+            case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
+            case 13: case 32: interact(player, player.getLookedAtTile()); break;
+          }
+        }
+      }
+    });
+  }
 
   let getActions = (player=null) => {
     let layers = mapLayers;

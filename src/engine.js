@@ -183,10 +183,10 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     }
   }
 
-  let drawLayers = (layers) => {
+  let drawLayer = (layer) => {
     for (let i = y; i < yrange; i++) {
       for (let j = x; j < xrange; j++) {
-        layers.forEach((layer) => layer.draw(i, j));
+        layer.draw(i, j);
       }
     }
   }
@@ -202,15 +202,18 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     if (!timeToDraw(time)) {
       requestAnimationFrame(draw);
     } else {
-      previousTime = time; 
+      previousTime = time;
       context.clearRect(0, 0, controlWidth, controlHeight);
-      drawLayers(backgroundLayers);
-      for (let player of players) {
-        player.draw();
-        player.move();
-        setPlayerLighting(player.getTile());
+      let thingsToDraw = mapLayers.concat(players).sort((a, b) => a.zIndex > b.zIndex);
+      for (let thing of thingsToDraw) {
+        if (thing instanceof Player) {
+          thing.draw();
+          thing.move();
+          setPlayerLighting(thing.getTile());
+        } else {
+          drawLayer(thing);
+        }
       }
-      drawLayers(foregroundLayers);
       drawMessages();
       if (!paused) {
         requestAnimationFrame(draw);
@@ -229,37 +232,37 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
   }
 
   let init = (map) => {
-    let playerOptions = map.characters["player"];
-    imgLoader([{
-      graphics: [playerOptions.sprites],
-      spritesheet: {
-        width: playerOptions.width,
-        height: playerOptions.height
-      }
-    }]).then((playerImages) => {
-      mapLayers = map.layers.sort((a, b) => a.zIndex > b.zIndex).map(initLayer);
-      backgroundLayers = mapLayers.filter((layer) => layer.zIndex < playerOptions.zIndex && layer.visible);
-      foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= playerOptions.zIndex && layer.visible);
-
-      playerOptions.files = playerImages[0].files;
-      playerOptions.layer = mapLayers[0];
-      playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer];
-      playerOptions.tileWidth = map.tileWidth;
-      playerOptions.tileHeight = map.tileHeight;
-
-      let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
-      player.on("changeTile", (p, tile) => {
-        getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
-          if (action.x === tile.x && action.y === tile.y) {
-            actionExecutor.execute(action, self, p);
+    let characters = map.characters || [];
+    if (characters.length > 0) {
+      let playerOptions = characters["player"];
+      if (playerOptions) {
+        imgLoader([{
+          graphics: [playerOptions.sprites],
+          spritesheet: {
+            width: playerOptions.width,
+            height: playerOptions.height
           }
-        })
-      });
+        }]).then((playerImages) => {
+          playerOptions.files = playerImages[0].files;
+          playerOptions.layer = mapLayers[0];
+          playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer];
+          playerOptions.tileWidth = map.tileWidth;
+          playerOptions.tileHeight = map.tileHeight;
 
-      players.push(player);
-
-      draw();
-    });
+          let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
+          player.on("changeTile", (p, tile) => {
+            getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+              if (action.x === tile.x && action.y === tile.y) {
+                actionExecutor.execute(action, self, p);
+              }
+            })
+          });
+          players.push(player);
+        });
+      }
+    }
+    mapLayers = map.layers.map(initLayer);
+    draw();
   }
 
   this.init = init;

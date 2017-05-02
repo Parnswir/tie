@@ -195,8 +195,8 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
   }
 
   let drawLayer = (layer) => {
-    for (let i = y; i < yrange; i++) {
-      for (let j = x; j < xrange; j++) {
+    for (let i = (layer.x || x); i < (layer.width || xrange); i++) {
+      for (let j = (layer.y || y); j < (layer.height || yrange); j++) {
         layer.draw(i, j);
       }
     }

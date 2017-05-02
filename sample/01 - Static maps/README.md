@@ -6,8 +6,6 @@ Run this example with webpack: `node_modules/.bin/webpack-dev-server --open`. Bu
 * Load a map with a simple layout
 * Use a tileset
 
-![screenshot](screenshot.jpg)
-
 ## Step by Step
 
 Welcome to the first example! Here you will learn the basics. This "game" is not really playable. Instead it will demonstrate how to load maps, and how to think in tiles.
@@ -110,4 +108,8 @@ This particular tile set has just two tiles: a white square and a black square. 
 
 Let's ignore [the possibility of multiple layers](../02%20-%20Layers) for a moment and focus on the single layer we have here. The `Example` layer uses the tile set we just created (tile sets are identified by their position in the ´tilesets´ array - so they start with index 0) and consists of five by five tiles.
 
-Then we define the actual layout of the tiles. Each location on the map (from (x=0, y=0) to (x=width-1, y=height-1)) is assigned a tile id.
+Then we define the actual layout of the tiles. Each location on the map (from [x=0, y=0] to [x=width-1, y=height-1]) is assigned a tile id. This is just a one-dimensional array, but the 2D-formatting in the file helps to visualize the map. Remember the tile ids from above? This is it, just black and white squares. Except it isn't: there are some zeros thrown into the mix. `0` - or anything that is not referenced in a tile set - is just a transparent tile, so we will see the background through here.
+
+![screenshot](screenshot.jpg)
+
+And that's it.

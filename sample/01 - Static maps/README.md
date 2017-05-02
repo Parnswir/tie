@@ -127,4 +127,4 @@ Or read the [second tutorial](../02%20-%20Layers) on what to do with them.
 
 ### Ready for your own adventure?
 
-Go back to the [main page](../../).
+Go back to the [main page](../../README.md).

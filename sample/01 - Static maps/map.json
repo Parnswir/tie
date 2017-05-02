@@ -3,21 +3,6 @@
   "height": 5,
   "tileHeight": 32,
   "tileWidth": 32,
-  "layers":[
-    {
-      "name": "Example",
-      "layout": [
-        1, 1, 1, 1, 1,
-        1, 0, 0, 0, 1,
-        1, 1, 0, 1, 1,
-        1, 1, 0, 1, 1,
-        2, 2, 2, 2, 2
-      ],
-      "width": 5,
-      "height": 5,
-      "tileset": 0
-    }
-  ],
   "tilesets": [
     {
       "firstgid": 1,
@@ -27,6 +12,21 @@
       "spacing": 0,
       "tileHeight": 32,
       "tileWidth": 32
+    }
+  ],
+  "layers":[
+    {
+      "name": "Example",
+      "tileset": 0,
+      "width": 5,
+      "height": 5,
+      "layout": [
+        1, 1, 1, 1, 1,
+        1, 0, 0, 0, 1,
+        1, 1, 0, 1, 1,
+        1, 1, 0, 1, 1,
+        2, 2, 2, 2, 2
+      ]
     }
   ]
 }

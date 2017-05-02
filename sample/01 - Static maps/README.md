@@ -8,6 +8,6 @@ Welcome to the first example!
 * Load a map with a simple layout
 * Use a tileset
 
-![screenshot](result.jpg)
+![screenshot](screenshot.jpg)
 
 ## Step by Step

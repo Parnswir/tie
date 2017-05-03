@@ -189,7 +189,7 @@ Now we can use multiple layers to get a depth effect by stacking trees:
 
 ![a hastily drawn forest](screenshot3.png)
 
-Notice how the trees partly overly each other.
+Notice how the trees partly overlay each other.
 
 ### Want to populate your game?
 

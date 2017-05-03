@@ -243,8 +243,10 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
   }
 
   let init = (map) => {
-    let characters = map.characters || [];
-    if (characters.length > 0) {
+    mapLayers = map.layers.map(initLayer);
+    draw();
+    let characters = map.characters || {};
+    if (Object.keys(characters).length > 0) {
       let playerOptions = characters["player"];
       if (playerOptions) {
         imgLoader([{
@@ -272,8 +274,6 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
         });
       }
     }
-    mapLayers = map.layers.map(initLayer);
-    draw();
   }
 
   this.init = init;

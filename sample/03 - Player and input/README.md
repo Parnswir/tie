@@ -104,12 +104,24 @@ Let's have a look at animations. We'll need to set `framesPerDirection` to `2` a
 ![photo-realistic sprites](player2.png)
 ![breathtaking animations](animation1.gif)
 
-
 ## What to do next?
 
 ### Try to make a character move behind an object
 
-tbd
+You may have noticed that characters (like layers) have a `zIndex` property. In fact, layers and characters are rendered together one after another, sorted by ascending zIndex. Now consider this change:
+
+```json
+[...]
+    "player": {
+      [...]
+      "zIndex": 1
+    }
+[...]
+```
+
+Now the order goes like this: [white layer], [player], [black layer], which is just what we wanted:
+
+![do I smell Oscar?](animation2.gif)
 
 ### You want automatic pathfinding?
 

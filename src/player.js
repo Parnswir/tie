@@ -99,7 +99,7 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
     if (path.length > 0) {
       movementFrameTimer++;
       if (movementFrameTimer >= options.movementFrameCount - 1) {
-        movementFrame = (movementFrame + 1) % 4;
+        movementFrame = (movementFrame + 1) % options.framesPerDirection;
         movementFrameTimer = 0;
       }
       let tileWidth = options.tileWidth;

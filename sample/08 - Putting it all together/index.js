@@ -1,5 +1,5 @@
-import TileEngine from '../src/engine';
-import MapLoader from '../src/map';
+import TileEngine from '../../src/engine';
+import MapLoader from '../../src/map';
 
 let loader = new MapLoader();
 loader.load('./assets/maps/house.json').then((map) => {

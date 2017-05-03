@@ -222,7 +222,9 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
           thing.move();
           setPlayerLighting(thing.getTile());
         } else {
-          drawLayer(thing);
+          if (thing.visible) {
+            drawLayer(thing);
+          }
         }
       }
       drawMessages();

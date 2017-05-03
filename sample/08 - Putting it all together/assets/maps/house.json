@@ -1,9 +1,6 @@
 {
-  "orientation": "orthogonal",
-  "properties": {},
   "tileHeight": 32,
   "tileWidth": 32,
-  "version": 1,
   "width": 10,
   "height": 10,
   "characters": {
@@ -23,6 +20,14 @@
   },
   "layers":[
     {
+      "name": "Ground",
+      "tileset": 0,
+      "visible": true,
+      "width": 10,
+      "height": 10,
+      "x": 0,
+      "y": 0,
+      "zIndex": 3,
       "layout": [
         40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
         40, 24, 24, 24, 24, 24, 24, 24, 24, 40,
@@ -35,16 +40,6 @@
         40,  1,  1,  1,  1,  1,  1,  1,  1, 40,
         40, 40, 40, 40, 40, 40, 40, 40, 40, 40
       ],
-      "height": 10,
-      "name": "Ground",
-      "opacity": 1,
-      "type": "tilelayer",
-      "tileset": 0,
-      "visible": true,
-      "width": 10,
-      "x": 0,
-      "y": 0,
-      "zIndex": 3,
       "lightmap": [
         [2, 0, 6, 2],
         [2, 1, 6, 2],
@@ -53,13 +48,11 @@
       ]
     },
     {
-      "height": 10,
       "name": "Objects",
-      "type": "tilelayer",
-      "opacity": 1,
       "tileset": 0,
       "visible": true,
       "width": 10,
+      "height": 10,
       "x": 0,
       "y": 0,
       "zIndex": 5,
@@ -88,8 +81,8 @@
           }
         },
         {
-          "x": 5, "y": 8, 
-          "type": "text", 
+          "x": 5, "y": 8,
+          "type": "text",
           "text": "I like this plant.\nI think I have a green thumb!"
         },
         {
@@ -127,13 +120,11 @@
       ]
     },
     {
-      "height": 10,
       "name": "ObjectsForeground",
-      "type": "tilelayer",
-      "opacity": 1,
       "tileset": 0,
       "visible": true,
       "width": 10,
+      "height": 10,
       "x": 0,
       "y": 0,
       "zIndex": 10,
@@ -162,13 +153,11 @@
       }
     },
     {
-      "height": 10,
       "name": "collision",
-      "type": "collisionlayer",
-      "opacity": 1,
       "tileset": 0,
       "visible": false,
       "width": 10,
+      "height": 10,
       "x": 0,
       "y": 0,
       "zIndex": 99,
@@ -188,22 +177,14 @@
   ],
   "tilesets": [
     {
-      "firstgid": 1,
+      "name": "inside",
       "image": "./assets/tilemaps/inside.png",
       "imageheight": 160,
       "imagewidth": 256,
-      "name": "inside",
       "spacing": 0,
-      "properties": {},
-      "terrains": [
-        {
-         "name": "Inside",
-         "tile": 0
-        }
-      ],
-      "tileHeight": 32,
-      "tiles": {},
-      "tileWidth": 32
+      "firstgid": 1,
+      "tileWidth": 32,
+      "tileHeight": 32
     }
   ]
 }

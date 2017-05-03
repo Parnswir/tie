@@ -6,7 +6,7 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   options.movementFrameCount = options.movementFrameCount || 8;
   options.framesPerDirection = options.framesPerDirection || 4;
   options.speed = options.speed || 1;
-  
+
   this.properties = options;
 
   let tile = {x, y};
@@ -22,7 +22,7 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
     direction = where % 4;
     createEvent("setDirection", direction);
   }
-  
+
   let path = [];
   this.getPath = () => path;
 
@@ -137,4 +137,5 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   };
 
   this.id = options.id;
+  this.zIndex = options.zIndex;
 }

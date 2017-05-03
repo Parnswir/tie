@@ -20,6 +20,7 @@
       "tileset": 0,
       "width": 5,
       "height": 5,
+      "visible": true,
       "layout": [
         1, 1, 1, 1, 1,
         1, 0, 0, 0, 1,

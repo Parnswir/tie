@@ -94,6 +94,7 @@ This particular tile set has just two tiles: a white square and a black square. 
       "tileset": 0,
       "width": 5,
       "height": 5,
+      "visible": true,
       "layout": [
         1, 1, 1, 1, 1,
         1, 0, 0, 0, 1,
@@ -106,7 +107,7 @@ This particular tile set has just two tiles: a white square and a black square. 
 }
 ```
 
-Let's ignore [the possibility of multiple layers](../02%20-%20Layers) for a moment and focus on the single layer we have here. The `Example` layer uses the tile set we just created (tile sets are identified by their position in the ´tilesets´ array - so they start with index 0) and consists of five by five tiles.
+Let's ignore [the possibility of multiple layers](../02%20-%20Layers) for a moment and focus on the single layer we have here. The `Example` layer uses the tile set we just created (tile sets are identified by their position in the ´tilesets´ array - so they start with index 0) and consists of five by five tiles. Also, the layer is visible, so it will be rendered. We will encounter some invisible layers [later](../04%20-%20Collision%20and%20pathfinding).
 
 Then we define the actual layout of the tiles. Each location on the map (from [x=0, y=0] to [x=width-1, y=height-1]) is assigned a tile id. This is just a one-dimensional array, but the 2D-formatting in the file helps to visualize the map. Remember the tile ids from above? This is it, just black and white squares. Except it isn't: there are some zeros thrown into the mix. `0` - or anything that is not referenced in a tile set - is just a transparent tile, so we will see the background through here.
 

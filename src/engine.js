@@ -46,10 +46,11 @@ let createElements = (container, names, outputEnabled=false) => {
   appendHtml(container, elements);
 }
 
-export default function TileEngine (x, y, xrange, yrange, parent=document.body, overrides) {
+export default function TileEngine (x, y, xrange, yrange, overrides) {
   let self = this;
   overrides = Object.assign({}, overrides);
 
+  let parent = overrides.parent || document.body;
   let elementNames = Object.assign(ELEMENT_NAMES, overrides.customElementNames);
   if (!overrides.useCustomElements) {
     createElements(parent, elementNames, overrides.enableTextOutput);

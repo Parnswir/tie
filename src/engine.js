@@ -245,6 +245,15 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
     return mapLayer;
   }
 
+  let createEmptyLayer = (map) => {
+    let layer = {
+      width: map.width,
+      height: map.height,
+      layout: Array(map.width * map.height).fill(0)
+    }
+    return initLayer(layer);
+  }
+
   let init = (map) => {
     mapLayers = map.layers.map(initLayer);
     draw();
@@ -261,7 +270,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
         }]).then((playerImages) => {
           playerOptions.files = playerImages[0].files;
           playerOptions.layer = mapLayers[0];
-          playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer];
+          playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(map);
           playerOptions.tileWidth = map.tileWidth;
           playerOptions.tileHeight = map.tileHeight;
 

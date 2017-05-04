@@ -58,10 +58,11 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   };
 
   this.off = (event, id) => {
-    let h = handlers[event];
-    if (h) {
-      h.filter((e) => e.id == id).forEach((element) => h.splice(h.indexOf(element), 1));
+    let h = handlers[event] || [];
+    if (id) {
+      h = h.filter((e) => e.id === id);
     }
+    h.forEach((element) => h.splice(h.indexOf(element), 1));
   };
 
   let createEvent = function (name, event) {

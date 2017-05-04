@@ -93,7 +93,7 @@ You might have noticed a small difference between the collision map and the obje
 
 ![many secret, so much wow](animation2.gif)
 
-It is interesting to not, that collision will also impact keyboard-induced movement. The player will not move into an obstacle, even if it gets the direct command.
+It is interesting to note, that collision will also impact keyboard-induced movement. The player will not move into an obstacle, even if it gets the direct command.
 
 Another use case for pathfinding is in automatic actions (and events, as we will see [later](../06%20-%20Simple%20actions)). Let's build a button that resets the player to the start position:
 
@@ -146,7 +146,7 @@ Cool. The character turns around once (0, 0) is reached. Unfortunately, it does 
   });
 ```
 
-If you give `off()` and ID of a handler, it will only remove this handler and leave other handlers intact. This is useful for more complex scenarios:
+If you give `off()` an ID of a handler, it will only remove this handler and leave other handlers intact. This is useful for more complex scenarios:
 
 ```js
   // index.js

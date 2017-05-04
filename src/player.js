@@ -95,8 +95,10 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   };
 
   let previousTile = tile;
+  let hadPath = false;
   this.move = function () {
     if (path.length > 0) {
+      hadPath = true;
       movementFrameTimer++;
       if (movementFrameTimer >= options.movementFrameCount - 1) {
         movementFrame = (movementFrame + 1) % options.framesPerDirection;
@@ -127,6 +129,11 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
           this.setDirection(modifier > 0 ? 0 : 1);
           pos.y += modifier * speed;
         }
+      }
+    } else {
+      if (hadPath) {
+        createEvent("movementComplete");
+        hadPath = false;
       }
     }
     tile = options.layer.getXYCoords(pos.x, pos.y);

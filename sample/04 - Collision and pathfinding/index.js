@@ -6,11 +6,16 @@ import MapLoader from '../../src/map';
       enableKeyboardInput: true,
       enableMouseInput: true
     });
-    tileEngine.init(map);
-
-    document.getElementById('resetButton').addEventListener('click', (e) => {
+    tileEngine.init(map).then(() => {
       let player = tileEngine.getCharacter('player');
-      player.goTo(0, 0);
-      player.on('once:movementComplete', () => player.setDirection(0));
+      let npc = tileEngine.getCharacter('example-npc');
+
+      player.on('movementComplete', () => npc.goTo(player.getTile().x, player.getTile().y));
+      npc.on('once:movementComplete', () => npc.setDirection(player.getDirection()));
+
+      document.getElementById('resetButton').addEventListener('click', (e) => {
+        player.goTo(0, 0);
+        player.on('once:movementComplete', () => player.setDirection(0));
+      });
     });
 });

@@ -18,6 +18,15 @@
       "zIndex": 1,
       "framesPerDirection": 2,
       "pathfindingLayer": 0
+    },
+    "example-npc": {
+      "sprites": "npc.png",
+      "width": 32,
+      "height": 32,
+      "zIndex": 0,
+      "x": 4,
+      "framesPerDirection": 2,
+      "pathfindingLayer": 0
     }
   },
   "layers":[

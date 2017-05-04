@@ -173,14 +173,51 @@ To make this a bit easier, you can also register an event handler that is only v
 
 ## What to do next?
 
-### Learn more about A* and other pathfinding algorithms
+### Try creating a character that follows the player
 
-* Very good [introduction and analysis of A*](http://theory.stanford.edu/~amitp/GameProgramming/AStarComparison.html) including more use cases and optimizations
-* [Interactive Demo](http://qiao.github.io/PathFinding.js/visual/) of many popular algorithms
+You can use the events from this example, as well as the methods `player.getTile()` and `player.getDirection()`.
+
+Assuming we have created a button with `id="followButton"` and a character called "example-npc", we can use
+
+```js
+  // index.js
+  // [...]
+  // add this:
+  document.getElementById('followButton').addEventListener('click', (e) => {
+    let player = tileEngine.getCharacter('player');
+    let npc = tileEngine.getCharacter('example-npc');
+    npc.goTo(player.getTile().x, player.getTile().y);
+    npc.on('once:movementComplete', () => npc.setDirection(player.getDirection()));
+  });
+```
+
+Or consider this more complex variation, in which the NPC follows the player after each completed movement:
+
+```js
+  // index.js
+  // [...]
+  tileEngine.init(map).then(() => {
+    let player = tileEngine.getCharacter('player');
+    let npc = tileEngine.getCharacter('example-npc');
+
+    player.on('movementComplete', () => npc.goTo(player.getTile().x, player.getTile().y));
+    npc.on('once:movementComplete', () => npc.setDirection(player.getDirection()));
+
+    document.getElementById('resetButton').addEventListener('click', (e) => {
+      player.goTo(0, 0);
+      player.on('once:movementComplete', () => player.setDirection(0));
+    });
+  });
+```
 
 ### Go to the next example
 
 Learn about lighting in TIE in the [next example](../05%20-%20Lighting).
+
+### Learn more about A* and other pathfinding algorithms
+
+* Very good [introduction and analysis of A*](http://theory.stanford.edu/~amitp/GameProgramming/AStarComparison.html) including more use cases and optimizations
+* [Interactive Demo](http://qiao.github.io/PathFinding.js/visual/) of many popular algorithms
 
 ### Ready for your own adventure?
 

@@ -270,11 +270,12 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   let init = (map) => {
     mapLayers = map.layers.map(initLayer);
     draw();
+    let promises = [];
     let characters = map.characters || {};
     for (let characterId of Object.keys(characters)) {
       let playerOptions = characters[characterId];
       if (playerOptions) {
-        imgLoader([{
+        promises.push(imgLoader([{
           graphics: [playerOptions.sprites],
           spritesheet: {
             width: playerOptions.width,
@@ -297,9 +298,10 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
           });
           players.push(player);
           playerMap[characterId] = player;
-        });
+        }));
       }
     }
+    return Promise.all(promises);
   }
 
   this.init = init;

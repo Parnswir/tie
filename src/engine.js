@@ -134,7 +134,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
       if (paused) {
         drawMessages()
       } else {
-        let player = players[0];
+        let player = getCharacter('player');
         let layer = player.properties.layer;
         let t = layer.applyMouseFocus(coords.x, coords.y);
         player.goTo(t.x, t.y);
@@ -147,7 +147,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
 
   if (overrides.enableKeyboardInput) {
     input.keyboard(function(pressed, status) {
-      let player = players[0];
+      let player = getCharacter('player');
       if (status) {
         if (paused) {
           if ([13, 32].indexOf(pressed) >= 0) {

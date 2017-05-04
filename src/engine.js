@@ -72,6 +72,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   let paused = false;
   let mapLayers = [];
   let players = [];
+  let playerMap = {};
 
   let actionExecutor = new ActionExecutor();
   actionExecutor.registerAction('toggleTile', (options, engine, player) => {
@@ -195,16 +196,18 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
     }
   }
 
+  let getCharacter = (id) => playerMap[id];
+
+  let setPlayerLighting = (tile) => {
+    mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
+  }
+
   let drawLayer = (layer) => {
     for (let i = 0; i < (layer.width || xrange); i++) {
       for (let j = 0; j < (layer.height || yrange); j++) {
         layer.draw(i, j, void 0, (layer.x || x), (layer.y || y));
       }
     }
-  }
-
-  let setPlayerLighting = (tile) => {
-    mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
   }
 
   let previousTime = 0;
@@ -245,21 +248,31 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
     return mapLayer;
   }
 
-  let createEmptyLayer = (map) => {
+  let computeOnce = (fn) => {
+    var instance = void 0;
+    return function () {
+      if (instance === void 0) {
+        instance = fn.apply(this, arguments);
+      }
+      return instance;
+    }
+  }
+
+  let createEmptyLayer = computeOnce((map) => {
     let layer = {
       width: map.width,
       height: map.height,
       layout: Array(map.width * map.height).fill(0)
     }
     return initLayer(layer);
-  }
+  });
 
   let init = (map) => {
     mapLayers = map.layers.map(initLayer);
     draw();
     let characters = map.characters || {};
-    if (Object.keys(characters).length > 0) {
-      let playerOptions = characters["player"];
+    for (let characterId of Object.keys(characters)) {
+      let playerOptions = characters[characterId];
       if (playerOptions) {
         imgLoader([{
           graphics: [playerOptions.sprites],
@@ -283,6 +296,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
             })
           });
           players.push(player);
+          playerMap[characterId] = player;
         });
       }
     }
@@ -292,6 +306,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   this.displayText = displayText;
   this.pause = pause;
   this.unpause = unpause;
+  this.getCharacter = getCharacter;
 
   this.actionExecutor = actionExecutor;
 }

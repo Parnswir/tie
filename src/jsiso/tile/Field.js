@@ -269,14 +269,12 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
       distanceLighting = Math.sqrt((Math.round(i - lightX) * Math.round(i - lightX)) + (Math.round(j - lightY) * Math.round(j - lightY)));
       if (lightMap) {
         var lightDist = 0;
-        var lightI;
-        var lightJ;
         // Calculate which light source is closest
         for (var light = 0; light < lightMap.length; light++) {
-          lightI = Math.round(i - lightMap[light][0]);
-          lightJ = Math.round(j - lightMap[light][1]);
-          lightDist = Math.sqrt(lightI * lightI + lightJ * lightJ);
-          if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (lightMap[light][2] * lightMap[light][3])) {
+          let lightX = Math.round(i - lightMap[light][0]);
+          let lightY = Math.round(j - lightMap[light][1]);
+          lightDist = Math.sqrt(lightX * lightX + lightY * lightY);
+          if (distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (lightMap[light][2] * lightMap[light][3])) {
             distanceLighting = lightDist;
             distanceLightingSettings.distance = lightMap[light][2];
             distanceLightingSettings.darkness = lightMap[light][3];
@@ -286,7 +284,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
       if(distanceLighting > distanceLightingSettings.distance){
         distanceLighting = distanceLightingSettings.distance;
       }
-      distanceLighting =  distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance);
+      distanceLighting = distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance);
     }
     if ((!zeroIsBlank) || (zeroIsBlank && graphicValue) || tileImageOverwite) {
       if (zeroIsBlank) {
@@ -505,7 +503,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
     if (distanceLightingSettings) {
       if (distanceLightingSettings.color !== false) {
         -- k;
-        if (distanceLighting < distanceLightingSettings.darkness) {
+        if (distanceLighting <= distanceLightingSettings.darkness) {
 
           // Apply distance shadows from light source
           if (stackGraphic !== undefined || (zeroIsBlank && stackGraphic !== 0)) {

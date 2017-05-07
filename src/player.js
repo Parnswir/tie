@@ -160,4 +160,5 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
 
   this.id = options.id;
   this.zIndex = options.zIndex;
+  this.useLighting = options.useLighting;
 }

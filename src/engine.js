@@ -224,7 +224,9 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
         if (thing instanceof Player) {
           thing.draw();
           thing.move();
-          setPlayerLighting(thing.getTile());
+          if (thing.useLighting) {
+            setPlayerLighting(thing.getTile());
+          }
         } else {
           if (thing.visible) {
             drawLayer(thing);

@@ -38,8 +38,8 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
 
   var heightMap = null;
   var lightMap = null;
-  var lightX = null;
-  var lightY = null;
+  var lightX = void 0;
+  var lightY = void 0;
 
   var heightOffset = 0;
   var heightShadows = null;
@@ -260,7 +260,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
       k = stack;
     }
 
-    if (shadowDistance) {
+    if (shadowDistance && lightX !== void 0 && lightY !== void 0) {
       distanceLightingSettings = {
         distance: shadowDistance.distance,
         darkness: shadowDistance.darkness,

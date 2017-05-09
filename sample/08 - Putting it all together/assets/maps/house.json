@@ -15,6 +15,7 @@
       "pathfindingLayer": 3,
       "movementFrameCount": 8,
       "framesPerDirection": 4,
+      "useLighting": true,
       "speed": 2
     }
   },

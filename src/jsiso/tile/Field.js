@@ -262,9 +262,9 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
 
     if (shadowDistance && lightX !== void 0 && lightY !== void 0) {
       distanceLightingSettings = {
-        distance: shadowDistance.distance,
-        darkness: shadowDistance.darkness,
-        color: shadowDistance.color
+        distance: shadowDistance.distance || 5,
+        darkness: shadowDistance.darkness || 1,
+        color: shadowDistance.color || "0, 0, 0"
       };
       distanceLighting = Math.sqrt((Math.round(i - lightX) * Math.round(i - lightX)) + (Math.round(j - lightY) * Math.round(j - lightY)));
       if (lightMap) {

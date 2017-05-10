@@ -260,7 +260,8 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
       k = stack;
     }
 
-    if (shadowDistance && lightX !== void 0 && lightY !== void 0) {
+    shadowDistance = shadowDistance || {};
+    if (lightX !== void 0 && lightY !== void 0) {
       distanceLightingSettings = {
         distance: shadowDistance.distance || 5,
         darkness: shadowDistance.darkness || 1,

@@ -166,11 +166,8 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
     });
   }
 
-  let getActions = (player=null) => {
+  let getActions = () => {
     let layers = mapLayers;
-    if (player !== null) {
-      layers = layers.filter((layer) => layer.zIndex === player.properties.zIndex);
-    }
     let actions = [];
     layers.forEach((layer) => actions = actions.concat(layer.actions || []));
     return actions;
@@ -178,7 +175,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
 
   let interact = (player, tile) => {
     if (!player.isMoving()) {
-      getActions(player)
+      getActions()
         .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
         .filter((action) => action.x === tile.x && action.y == tile.y)
         .forEach((action) => actionExecutor.execute(action, self, player));

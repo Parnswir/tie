@@ -66,8 +66,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   const controlHeight = container.clientHeight;
   const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, elementNames.containerName, true);
 
-  let backgroundLayers = [];
-  let foregroundLayers = [];
+  let currentMap;
 
   let paused = false;
   let mapLayers = [];
@@ -167,10 +166,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   }
 
   let getActions = () => {
-    let layers = mapLayers;
-    let actions = [];
-    layers.forEach((layer) => actions = actions.concat(layer.actions || []));
-    return actions;
+    return currentMap.actions;
   }
 
   let interact = (player, tile) => {
@@ -267,6 +263,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   });
 
   let init = (map) => {
+    currentMap = map;
     mapLayers = map.layers.map(initLayer);
     draw();
     let promises = [];
@@ -310,4 +307,5 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   this.getCharacter = getCharacter;
 
   this.actionExecutor = actionExecutor;
+  this.currentMap = currentMap;
 }

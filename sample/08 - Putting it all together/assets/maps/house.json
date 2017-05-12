@@ -69,50 +69,6 @@
         40, 40, 40, 40, 40, 28, 40, 40, 25, 40,
         40, 40, 40, 40, 40, 40, 40, 40, 40, 40
       ],
-      "actions": [
-        {
-          "x": 1, "y": 3,
-          "type": "toggleTile",
-          "target": {"x": 1, "y": 3},
-          "tiles": [29, 30],
-          "next": {
-            "type": "toggleTile",
-            "target": {"x": 1, "y": 2},
-            "tiles": [21, 22]
-          }
-        },
-        {
-          "x": 5, "y": 8,
-          "type": "text",
-          "text": "I like this plant.\nI think I have a green thumb!"
-        },
-        {
-          "x": 8, "y": 4,
-          "type": "positional",
-          "next": {
-            "type": "text",
-            "text": "I can't go outside yet. The engine does not support it!",
-            "next": {
-              "type": "move",
-              "entity": "player",
-              "target": {"x": 7, "y": 4}
-            }
-          }
-        },
-        {
-          "x": 8, "y": 5,
-          "type": "positional",
-          "next": {
-            "type": "text",
-            "text": "I can't go outside yet. The engine does not support it!",
-            "next": {
-              "type": "move",
-              "entity": "player",
-              "target": {"x": 7, "y": 5}
-            }
-          }
-        }
-      ],
       "lightmap": [
         [2, 0, 6, 2],
         [2, 1, 6, 2],
@@ -186,6 +142,50 @@
       "firstgid": 1,
       "tileWidth": 32,
       "tileHeight": 32
+    }
+  ],
+  "actions": [
+    {
+      "x": 1, "y": 3,
+      "type": "toggleTile",
+      "target": {"x": 1, "y": 3},
+      "tiles": [29, 30],
+      "next": {
+        "type": "toggleTile",
+        "target": {"x": 1, "y": 2},
+        "tiles": [21, 22]
+      }
+    },
+    {
+      "x": 5, "y": 8,
+      "type": "text",
+      "text": "I like this plant.\nI think I have a green thumb!"
+    },
+    {
+      "x": 8, "y": 4,
+      "type": "positional",
+      "next": {
+        "type": "text",
+        "text": "I can't go outside yet. The engine does not support it!",
+        "next": {
+          "type": "move",
+          "entity": "player",
+          "target": {"x": 7, "y": 4}
+        }
+      }
+    },
+    {
+      "x": 8, "y": 5,
+      "type": "positional",
+      "next": {
+        "type": "text",
+        "text": "I can't go outside yet. The engine does not support it!",
+        "next": {
+          "type": "move",
+          "entity": "player",
+          "target": {"x": 7, "y": 5}
+        }
+      }
     }
   ]
 }

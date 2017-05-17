@@ -115,7 +115,7 @@ Static lights are organized in this way: `[x, y, distance, darkness]`. They use 
 
 ### Make your game more interactive
 
-Have a look at the [next example](../06%20-%20Simple%20action) to learn about actions and events.
+Have a look at the [next example](../06%20-%20Actions) to learn about actions and events.
 
 ### Ready for your own adventure?
 

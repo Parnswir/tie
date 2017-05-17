@@ -95,7 +95,7 @@ You might have noticed a small difference between the collision map and the obje
 
 It is interesting to note, that collision will also impact keyboard-induced movement. The player will not move into an obstacle, even if it gets the direct command.
 
-Another use case for pathfinding is in automatic actions (and events, as we will see [later](../06%20-%20Simple%20actions)). Let's build a button that resets the player to the start position:
+Another use case for pathfinding is in automatic actions (and events, as we will see [later](../06%20-%20Actions)). Let's build a button that resets the player to the start position:
 
 ```html
 <!-- index.html -->

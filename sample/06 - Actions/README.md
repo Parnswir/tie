@@ -2,11 +2,15 @@ Run this example with webpack: `node_modules/.bin/webpack-dev-server --open`. Bu
 
 ## This Will Show You How to
 
-* Use built-in actions
+* Add the actual mechanics to your game
+* Use simple built-in actions
+* Create custom actions in JavaScript
 
 ## Step by Step
 
 Actions make your game more interactive by providing the player with the ability to change objects, trigger events, alter the map, and so on. This is where the game gets its mechanics.
+
+### Simple Built-in Actions
 
 There are some basic actions built-in:
 
@@ -15,8 +19,6 @@ There are some basic actions built-in:
 | move | Moves a character |
 | text | Displays text |
 | toggleTile | Changes a tile to the next one of a given set of options |
-
-You can easily [create your own actions](../07%20-%20Custom%20actions), too.
 
 Actions are defined in the map file:
 

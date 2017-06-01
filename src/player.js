@@ -6,7 +6,7 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   options.movementFrameCount = options.movementFrameCount || 8;
   options.framesPerDirection = options.framesPerDirection || 4;
   options.speed = options.speed || 1;
-  
+
   this.properties = options;
 
   let tile = {x, y};
@@ -22,7 +22,7 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
     direction = where % 4;
     createEvent("setDirection", direction);
   }
-  
+
   let path = [];
   this.getPath = () => path;
 
@@ -33,21 +33,36 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   let getFrameX = (offset) => pos.x - options.files[0].width / 2 + offset.x;
   let getFrameY = (offset) => pos.y - options.files[0].height / 2 + offset.y;
 
+  let once = function (event, id, handler) {
+    return function () {
+      handler.apply(this.arguments);
+      self.off(event, id);
+    }
+  }
+
   let handlers = {};
   this.on = (event, handler) => {
+    let id = Date.now();
+    let element;
+    if (event.startsWith('once:')) {
+      event = event.replace('once:', '');
+      element = {id, 'handler': once(event, id, handler)};
+    } else {
+      element = {id, handler};
+    }
     if (!handlers[event]) {
       handlers[event] = [];
     }
-    let id = Date.now();
-    handlers[event].push({id, handler});
+    handlers[event].push(element);
     return id;
   };
 
   this.off = (event, id) => {
-    let h = handlers[event];
-    if (h) {
-      h.filter((e) => e.id == id).forEach((element) => h.splice(h.indexOf(element), 1));
+    let h = handlers[event] || [];
+    if (id) {
+      h = h.filter((e) => e.id === id);
     }
+    h.forEach((element) => h.splice(h.indexOf(element), 1));
   };
 
   let createEvent = function (name, event) {
@@ -95,11 +110,13 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   };
 
   let previousTile = tile;
+  let hadPath = false;
   this.move = function () {
     if (path.length > 0) {
+      hadPath = true;
       movementFrameTimer++;
       if (movementFrameTimer >= options.movementFrameCount - 1) {
-        movementFrame = (movementFrame + 1) % 4;
+        movementFrame = (movementFrame + 1) % options.framesPerDirection;
         movementFrameTimer = 0;
       }
       let tileWidth = options.tileWidth;
@@ -128,6 +145,11 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
           pos.y += modifier * speed;
         }
       }
+    } else {
+      if (hadPath) {
+        createEvent("movementComplete");
+        hadPath = false;
+      }
     }
     tile = options.layer.getXYCoords(pos.x, pos.y);
     if (tile.x !== previousTile.x || tile.y !== previousTile.y) {
@@ -137,4 +159,6 @@ export default function Player(context, properties, x=0, y=0, pathfind) {
   };
 
   this.id = options.id;
+  this.zIndex = options.zIndex;
+  this.useLighting = options.useLighting;
 }

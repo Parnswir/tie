@@ -1,0 +1,33 @@
+{
+  "width": 5,
+  "height": 5,
+  "tileHeight": 32,
+  "tileWidth": 32,
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "image": "./tiles.png",
+      "imageheight": 32,
+      "imagewidth": 64,
+      "spacing": 0,
+      "tileHeight": 32,
+      "tileWidth": 32
+    }
+  ],
+  "layers":[
+    {
+      "name": "Example",
+      "tileset": 0,
+      "width": 5,
+      "height": 5,
+      "visible": true,
+      "layout": [
+        1, 1, 1, 1, 1,
+        1, 0, 0, 0, 1,
+        1, 1, 0, 1, 1,
+        1, 1, 0, 1, 1,
+        2, 2, 2, 2, 2
+      ]
+    }
+  ]
+}

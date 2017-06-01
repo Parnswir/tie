@@ -2,7 +2,7 @@ export default function ActionExecutor() {
   let actions = {};
 
   this.TYPE_POSITIONAL = "positional";
-  
+
   this.registerAction = function (type, execute, override=false) {
     if (override || !actions[type]) {
       actions[type] = execute;
@@ -23,8 +23,9 @@ export default function ActionExecutor() {
 
   this.registerAction("text", (options, engine, player) => engine.displayText(options.text.split("\n")), true);
   this.registerAction("move", (options, engine, player) => {
-    if (options.entity === "player") {
-      player.goTo(options.target.x, options.target.y);
+    let character = engine.getCharacter(options.entity);
+    if (character !== void 0) {
+      character.goTo(options.target.x, options.target.y);
     }
   })
 }

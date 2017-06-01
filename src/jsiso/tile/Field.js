@@ -38,8 +38,8 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
 
   var heightMap = null;
   var lightMap = null;
-  var lightX = null;
-  var lightY = null;
+  var lightX = void 0;
+  var lightY = void 0;
 
   var heightOffset = 0;
   var heightShadows = null;
@@ -57,7 +57,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
   var focusTilePosX = 0;
   var focusTilePosY = 0;
 
-  var alphaWhenFocusBehind =  {}; // Used for applying alpha to objects infront of focus 
+  var alphaWhenFocusBehind =  {}; // Used for applying alpha to objects infront of focus
 
   var tilesHide = null;
   var hideSettings = null;
@@ -108,7 +108,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
     if(settings.particleEffects) {
       particleEffects = settings.particleEffects;
     }
-    
+
     if (settings.width) {
       var row = [];
       var col = 0;
@@ -128,7 +128,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
         }
       }
     }
-    
+
     alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
   }
 
@@ -233,11 +233,11 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
     }
   }
 
-  function _draw(i, j, tileImageOverwite) {
+  function _draw(x, y, tileImageOverwite, xOffset, yOffset) {
 
-    var xpos, ypos;
-    i = Math.round(i);
-    j = Math.round(j);
+    let xpos, ypos;
+    let i = Math.round(x);
+    let j = Math.round(y);
     if (i < 0) { return; }
     if (j < 0) { return; }
     if (i > mapLayout.length - 1) {
@@ -260,23 +260,22 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
       k = stack;
     }
 
-    if (shadowDistance) {
+    shadowDistance = shadowDistance || {};
+    if (lightX !== void 0 && lightY !== void 0) {
       distanceLightingSettings = {
-        distance: shadowDistance.distance,
-        darkness: shadowDistance.darkness,
-        color: shadowDistance.color
+        distance: shadowDistance.distance || 5,
+        darkness: shadowDistance.darkness || 1,
+        color: shadowDistance.color || "0, 0, 0"
       };
       distanceLighting = Math.sqrt((Math.round(i - lightX) * Math.round(i - lightX)) + (Math.round(j - lightY) * Math.round(j - lightY)));
       if (lightMap) {
         var lightDist = 0;
-        var lightI;
-        var lightJ;
         // Calculate which light source is closest
         for (var light = 0; light < lightMap.length; light++) {
-          lightI = Math.round(i - lightMap[light][0]);
-          lightJ = Math.round(j - lightMap[light][1]);
-          lightDist = Math.sqrt(lightI * lightI + lightJ * lightJ);
-          if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (lightMap[light][2] * lightMap[light][3])) {
+          let lightX = Math.round(i - lightMap[light][0]);
+          let lightY = Math.round(j - lightMap[light][1]);
+          lightDist = Math.sqrt(lightX * lightX + lightY * lightY);
+          if (distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (lightMap[light][2] * lightMap[light][3])) {
             distanceLighting = lightDist;
             distanceLightingSettings.distance = lightMap[light][2];
             distanceLightingSettings.darkness = lightMap[light][3];
@@ -286,7 +285,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
       if(distanceLighting > distanceLightingSettings.distance){
         distanceLighting = distanceLightingSettings.distance;
       }
-      distanceLighting =  distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance);
+      distanceLighting = distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance);
     }
     if ((!zeroIsBlank) || (zeroIsBlank && graphicValue) || tileImageOverwite) {
       if (zeroIsBlank) {
@@ -313,14 +312,14 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
           }
         }
       }
-      
+
       resizedTileHeight = 0;
       if (stackGraphic) {
         resizedTileHeight =  stackGraphic.height / (stackGraphic.width / tileWidth);
       }
       if (!isometric) {
-        xpos = i * (tileHeight * curZoom) + drawX;
-        ypos = j * (tileWidth  * curZoom) + drawY;
+        xpos = (i + xOffset) * (tileHeight * curZoom) + drawX;
+        ypos = (j + yOffset) * (tileWidth  * curZoom) + drawY;
       }
       else {
         xpos = (i - j) * (tileHeight * curZoom) + drawX;
@@ -366,16 +365,16 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
         }
       }
       else {
-        
+
         if (heightMapOnTop) {
 
-          // If tile is to be placed on top of heightmap 
+          // If tile is to be placed on top of heightmap
 
           if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
             if (tileImageOverwite) {
 
               // Draw overwriting image on top of height map
-                
+
               ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + ((stack - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
             }
             else {
@@ -505,7 +504,7 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
     if (distanceLightingSettings) {
       if (distanceLightingSettings.color !== false) {
         -- k;
-        if (distanceLighting < distanceLightingSettings.darkness) {
+        if (distanceLighting <= distanceLightingSettings.darkness) {
 
           // Apply distance shadows from light source
           if (stackGraphic !== undefined || (zeroIsBlank && stackGraphic !== 0)) {
@@ -776,8 +775,8 @@ export default function (ctx, mapWidth, mapHeight, mapLayout) {
       return _setup(settings);
     },
 
-    draw: function(tileX, tileY, tileImageOverwite) {
-      return _draw(tileX, tileY, tileImageOverwite);
+    draw: function(tileX, tileY, tileImageOverwite, xOffset=0, yOffset=0) {
+      return _draw(tileX, tileY, tileImageOverwite, xOffset, yOffset);
     },
 
     stackTiles: function(settings) {

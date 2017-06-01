@@ -1,0 +1,115 @@
+{
+  "width": 5,
+  "height": 5,
+  "tileHeight": 32,
+  "tileWidth": 32,
+  "tilesets": [
+    {
+      "image": "./tiles.png",
+      "tileHeight": 32,
+      "tileWidth": 32
+    }
+  ],
+  "characters": {
+    "player": {
+      "sprites": "player.png",
+      "width": 32,
+      "height": 32,
+      "zIndex": 1,
+      "x": 1,
+      "y": 2,
+      "framesPerDirection": 2,
+      "pathfindingLayer": 0
+    },
+    "example-npc": {
+      "sprites": "npc.png",
+      "width": 32,
+      "height": 32,
+      "zIndex": 1,
+      "x": 3,
+      "y": 2,
+      "framesPerDirection": 2
+    }
+  },
+  "layers":[
+    {
+      "name": "collision",
+      "tileset": 0,
+      "width": 5,
+      "height": 5,
+      "zIndex": 0,
+      "visible": false,
+      "layout": [
+        2, 2, 2, 2, 2,
+        2, 0, 0, 1, 2,
+        2, 0, 0, 1, 2,
+        2, 0, 0, 1, 2,
+        2, 2, 2, 2, 2
+      ]
+    },
+    {
+      "name": "objects",
+      "tileset": 0,
+      "width": 5,
+      "height": 5,
+      "zIndex": 1,
+      "visible": true,
+      "layout": [
+        2, 2, 2, 2, 2,
+        2, 1, 1, 3, 2,
+        2, 1, 1, 1, 2,
+        2, 1, 1, 4, 2,
+        2, 2, 2, 2, 2
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "x": 3, "y": 1,
+      "type": "text",
+      "text": "This is a text action. Press [Enter] or [Space] to continue...",
+      "next": {
+        "type": "text",
+        "text": "Good job!"
+      }
+    },
+    {
+      "x": 2, "y": 2,
+      "type": "positional",
+      "next": {
+        "type": "move",
+        "entity": "example-npc",
+        "target": {"x": 3, "y": 3}
+      }
+    },
+    {
+      "x": 2, "y": 3,
+      "type": "positional",
+      "next": {
+        "type": "move",
+        "entity": "example-npc",
+        "target": {"x": 3, "y": 2}
+      }
+    },
+    {
+      "x": 3, "y": 3,
+      "type": "toggleTile",
+      "target": {"x": 3, "y": 3},
+      "tiles": [2, 3, 4],
+      "next": {
+        "type": "toggleTile",
+        "target": {"x": 3, "y": 1},
+        "tiles": [2, 3, 4]
+      }
+    },
+    {
+      "x": 1, "y": 1,
+      "type": "positional",
+      "next": {
+        "type": "my-custom-action",
+        "hint": "See index.js for implementation",
+        "someProperty": "someValue"
+      }
+    }
+  ]
+}

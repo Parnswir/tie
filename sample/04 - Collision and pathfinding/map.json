@@ -1,0 +1,64 @@
+{
+  "width": 5,
+  "height": 5,
+  "tileHeight": 32,
+  "tileWidth": 32,
+  "tilesets": [
+    {
+      "image": "./tiles.png",
+      "tileHeight": 32,
+      "tileWidth": 32
+    }
+  ],
+  "characters": {
+    "player": {
+      "sprites": "player.png",
+      "width": 32,
+      "height": 32,
+      "zIndex": 1,
+      "framesPerDirection": 2,
+      "pathfindingLayer": 0
+    },
+    "example-npc": {
+      "sprites": "npc.png",
+      "width": 32,
+      "height": 32,
+      "zIndex": 0,
+      "x": 4,
+      "framesPerDirection": 2,
+      "pathfindingLayer": 0
+    }
+  },
+  "layers":[
+    {
+      "name": "collision",
+      "tileset": 0,
+      "width": 5,
+      "height": 5,
+      "zIndex": 0,
+      "visible": false,
+      "layout": [
+        0, 1, 0, 0, 0,
+        0, 0, 0, 1, 1,
+        0, 1, 0, 1, 0,
+        0, 1, 0, 0, 0,
+        0, 0, 0, 1, 0
+      ]
+    },
+    {
+      "name": "objects",
+      "tileset": 0,
+      "width": 5,
+      "height": 5,
+      "zIndex": 2,
+      "visible": true,
+      "layout": [
+        0, 2, 0, 0, 0,
+        0, 0, 0, 2, 2,
+        2, 2, 0, 2, 0,
+        0, 2, 0, 0, 0,
+        0, 0, 0, 2, 0
+      ]
+    }
+  ]
+}

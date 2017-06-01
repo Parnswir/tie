@@ -34,23 +34,27 @@ let appendHtml = (el, str) => {
   }
 }
 
-let createElements = (container, names) => {
-  let elements = '\
-    <div id="' + names.containerName + '"></div>\
-    <div class="text-frame" id="' + names.frameName + '">\
-      <span class="text-message" id="' + names.messageName + '"></span>\
-      <span id="' + names.indicatorName + '">▼</span>\
-    </div>\
-  ';
+let createElements = (container, names, outputEnabled=false) => {
+  let elements = '<div id="' + names.containerName + '"></div>';
+  if (outputEnabled) {
+    elements += '\
+      <div class="text-frame" id="' + names.frameName + '">\
+        <span class="text-message" id="' + names.messageName + '"></span>\
+        <span id="' + names.indicatorName + '">▼</span>\
+      </div>';
+  }
   appendHtml(container, elements);
 }
 
-export default function TileEngine (x, y, xrange, yrange, parent=document.body, overrides) {
+export default function TileEngine (x, y, xrange, yrange, overrides) {
   let self = this;
   overrides = Object.assign({}, overrides);
 
-  let elementNames = Object.assign(ELEMENT_NAMES, overrides.elementNames);
-  createElements(parent, elementNames);
+  let parent = overrides.parent || document.body;
+  let elementNames = Object.assign(ELEMENT_NAMES, overrides.customElementNames);
+  if (!overrides.useCustomElements) {
+    createElements(parent, elementNames, overrides.enableTextOutput);
+  }
   const container = document.getElementById(elementNames.containerName);
 
   let textMessages = [];
@@ -62,12 +66,12 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
   const controlHeight = container.clientHeight;
   const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, elementNames.containerName, true);
 
-  let backgroundLayers = [];
-  let foregroundLayers = [];
+  let currentMap;
 
   let paused = false;
   let mapLayers = [];
   let players = [];
+  let playerMap = {};
 
   let actionExecutor = new ActionExecutor();
   actionExecutor.registerAction('toggleTile', (options, engine, player) => {
@@ -79,61 +83,95 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     })
   });
 
-  //CanvasControl.fullScreen();
-  const input = new CanvasInput(document, CanvasControl());
+  let clearText = function () {};
+  let displayText = function () {};
+  let drawMessages = function () {};
 
-  input.mouse_action(function(coords) {
-    if (paused) {
-      drawMessages()
-    } else {
-      let player = players[0];
-      let layer = player.properties.layer;
-      let t = layer.applyMouseFocus(coords.x, coords.y);
-      player.goTo(t.x, t.y);
-      if (Math.abs(t.x - player.getTile().x) + Math.abs(t.y - player.getTile().y) === 1) {
-        interact(player, t);
+  if (overrides.enableTextOutput) {
+    textMessageFrame.onclick = () => {
+      if (paused) {
+        drawMessages();
+      }
+    };
+
+    clearText = () => {
+      textMessages = [];
+      textMessageFrame.classList.remove("in");
+      textMessage.innerHTML = "";
+      textIndicator.classList.remove("in");
+      if (paused) {
+        unpause();
       }
     }
-  });
 
-  textMessageFrame.onclick = () => {
-    if (paused) {
-      drawMessages();
+    displayText = (text) => {
+      textMessages = textMessages.concat(text);
     }
-  };
 
-  input.keyboard(function(pressed, status) {
-    let player = players[0];
-    if (status) {
-      if (paused) {
-        if ([13, 32].indexOf(pressed) >= 0) {
-          drawMessages();
+    drawMessages = () => {
+      if (textMessages.length > 0) {
+        pause();
+        let text = textMessages.splice(0, 1)[0];
+        textMessage.innerHTML = text;
+        if (!("in" in textMessageFrame.classList)) {
+          textMessageFrame.classList.add("in");
+        }
+        if (textMessages.length >= 1) {
+          textIndicator.classList.add("in");
+        } else {
+          textIndicator.classList.remove("in");
         }
       } else {
-        switch (pressed) {
-          case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;
-          case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
-          case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
-          case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
-          case 13: case 32: interact(player, player.getLookedAtTile()); break;
-        }
+        clearText();
       }
     }
-  });
+  }
 
-  let getActions = (player=null) => {
-    let layers = mapLayers;
-    if (player !== null) {
-      layers = layers.filter((layer) => layer.zIndex === player.properties.zIndex);
-    }
-    let actions = [];
-    layers.forEach((layer) => actions = actions.concat(layer.actions || []));
-    return actions;
+  const input = new CanvasInput(document, CanvasControl());
+  if (overrides.enableMouseInput) {
+    input.mouse_action(function(coords) {
+      if (paused) {
+        drawMessages()
+      } else {
+        let player = getCharacter('player');
+        let layer = player.properties.layer;
+        let t = layer.applyMouseFocus(coords.x, coords.y);
+        player.goTo(t.x, t.y);
+        if (Math.abs(t.x - player.getTile().x) + Math.abs(t.y - player.getTile().y) === 1) {
+          interact(player, t);
+        }
+      }
+    });
+  }
+
+  if (overrides.enableKeyboardInput) {
+    input.keyboard(function(pressed, status) {
+      let player = getCharacter('player');
+      if (status) {
+        if (paused) {
+          if ([13, 32].indexOf(pressed) >= 0) {
+            drawMessages();
+          }
+        } else {
+          switch (pressed) {
+            case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;
+            case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
+            case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
+            case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
+            case 13: case 32: interact(player, player.getLookedAtTile()); break;
+          }
+        }
+      }
+    });
+  }
+
+  let getActions = () => {
+    return currentMap.actions;
   }
 
   let interact = (player, tile) => {
     if (!player.isMoving()) {
-      getActions(player)
+      getActions()
         .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
         .filter((action) => action.x === tile.x && action.y == tile.y)
         .forEach((action) => actionExecutor.execute(action, self, player));
@@ -151,48 +189,18 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     }
   }
 
-  let clearText = () => {
-    textMessages = [];
-    textMessageFrame.classList.remove("in");
-    textMessage.innerHTML = "";
-    textIndicator.classList.remove("in");
-    if (paused) {
-      unpause();
-    }
-  }
-
-  let displayText = (text) => {
-    textMessages = textMessages.concat(text);
-  }
-
-  let drawMessages = () => {
-    if (textMessages.length > 0) {
-      pause();
-      let text = textMessages.splice(0, 1)[0];
-      textMessage.innerHTML = text;
-      if (!("in" in textMessageFrame.classList)) {
-        textMessageFrame.classList.add("in");
-      }
-      if (textMessages.length >= 1) {
-        textIndicator.classList.add("in");
-      } else {
-        textIndicator.classList.remove("in");
-      }
-    } else {
-      clearText();
-    }
-  }
-
-  let drawLayers = (layers) => {
-    for (let i = y; i < yrange; i++) {
-      for (let j = x; j < xrange; j++) {
-        layers.forEach((layer) => layer.draw(i, j));
-      }
-    }
-  }
+  let getCharacter = (id) => playerMap[id];
 
   let setPlayerLighting = (tile) => {
     mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
+  }
+
+  let drawLayer = (layer) => {
+    for (let i = 0; i < (layer.width || xrange); i++) {
+      for (let j = 0; j < (layer.height || yrange); j++) {
+        layer.draw(i, j, void 0, (layer.x || x), (layer.y || y));
+      }
+    }
   }
 
   let previousTime = 0;
@@ -202,15 +210,22 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     if (!timeToDraw(time)) {
       requestAnimationFrame(draw);
     } else {
-      previousTime = time; 
+      previousTime = time;
       context.clearRect(0, 0, controlWidth, controlHeight);
-      drawLayers(backgroundLayers);
-      for (let player of players) {
-        player.draw();
-        player.move();
-        setPlayerLighting(player.getTile());
+      let thingsToDraw = mapLayers.concat(players).sort((a, b) => a.zIndex > b.zIndex);
+      for (let thing of thingsToDraw) {
+        if (thing instanceof Player) {
+          thing.draw();
+          thing.move();
+          if (thing.useLighting) {
+            setPlayerLighting(thing.getTile());
+          }
+        } else {
+          if (thing.visible) {
+            drawLayer(thing);
+          }
+        }
       }
-      drawLayers(foregroundLayers);
       drawMessages();
       if (!paused) {
         requestAnimationFrame(draw);
@@ -228,44 +243,69 @@ export default function TileEngine (x, y, xrange, yrange, parent=document.body, 
     return mapLayer;
   }
 
-  let init = (map) => {
-    let playerOptions = map.characters["player"];
-    imgLoader([{
-      graphics: [playerOptions.sprites],
-      spritesheet: {
-        width: playerOptions.width,
-        height: playerOptions.height
+  let computeOnce = (fn) => {
+    var instance = void 0;
+    return function () {
+      if (instance === void 0) {
+        instance = fn.apply(this, arguments);
       }
-    }]).then((playerImages) => {
-      mapLayers = map.layers.sort((a, b) => a.zIndex > b.zIndex).map(initLayer);
-      backgroundLayers = mapLayers.filter((layer) => layer.zIndex < playerOptions.zIndex && layer.visible);
-      foregroundLayers = mapLayers.filter((layer) => layer.zIndex >= playerOptions.zIndex && layer.visible);
+      return instance;
+    }
+  }
 
-      playerOptions.files = playerImages[0].files;
-      playerOptions.layer = mapLayers[0];
-      playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer];
-      playerOptions.tileWidth = map.tileWidth;
-      playerOptions.tileHeight = map.tileHeight;
+  let createEmptyLayer = computeOnce((map) => {
+    let layer = {
+      width: map.width,
+      height: map.height,
+      layout: Array(map.width * map.height).fill(0)
+    }
+    return initLayer(layer);
+  });
 
-      let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
-      player.on("changeTile", (p, tile) => {
-        getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
-          if (action.x === tile.x && action.y === tile.y) {
-            actionExecutor.execute(action, self, p);
+  let init = (map) => {
+    currentMap = map;
+    mapLayers = map.layers.map(initLayer);
+    draw();
+    let promises = [];
+    let characters = map.characters || {};
+    for (let characterId of Object.keys(characters)) {
+      let playerOptions = characters[characterId];
+      if (playerOptions) {
+        promises.push(imgLoader([{
+          graphics: [playerOptions.sprites],
+          spritesheet: {
+            width: playerOptions.width,
+            height: playerOptions.height
           }
-        })
-      });
+        }]).then((playerImages) => {
+          playerOptions.files = playerImages[0].files;
+          playerOptions.layer = mapLayers[0];
+          playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(map);
+          playerOptions.tileWidth = map.tileWidth;
+          playerOptions.tileHeight = map.tileHeight;
 
-      players.push(player);
-
-      draw();
-    });
+          let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
+          player.on("changeTile", (p, tile) => {
+            getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+              if (action.x === tile.x && action.y === tile.y) {
+                actionExecutor.execute(action, self, p);
+              }
+            })
+          });
+          players.push(player);
+          playerMap[characterId] = player;
+        }));
+      }
+    }
+    return Promise.all(promises);
   }
 
   this.init = init;
   this.displayText = displayText;
   this.pause = pause;
   this.unpause = unpause;
+  this.getCharacter = getCharacter;
 
   this.actionExecutor = actionExecutor;
+  this.currentMap = currentMap;
 }

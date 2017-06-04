@@ -1,18 +1,27 @@
-export default function ActionExecutor() {
-  let actions = {};
+export default class ActionExecutor {
+  constructor() {
+    this._actions = {};
+    this.TYPE_POSITIONAL = "positional";
 
-  this.TYPE_POSITIONAL = "positional";
+    this.registerAction("text", (options, engine, player) => engine.displayText(options.text.split("\n")), true);
+    this.registerAction("move", (options, engine, player) => {
+      let character = engine.getCharacter(options.entity);
+      if (character !== void 0) {
+        character.goTo(options.target.x, options.target.y);
+      }
+    })
+  }
 
-  this.registerAction = function (type, execute, override=false) {
-    if (override || !actions[type]) {
-      actions[type] = execute;
+  registerAction(type, execute, override=false) {
+    if (override || !this._actions[type]) {
+      this._actions[type] = execute;
     } else {
       console.warn("Action already registered: ", type);
     }
   }
 
-  this.execute = function (options, engine, player) {
-    let executor = actions[options.type];
+  execute(options, engine, player) {
+    let executor = this._actions[options.type];
     if (executor) {
       executor(options, engine, player);
     }
@@ -20,12 +29,4 @@ export default function ActionExecutor() {
       this.execute(options.next, engine, player);
     }
   }
-
-  this.registerAction("text", (options, engine, player) => engine.displayText(options.text.split("\n")), true);
-  this.registerAction("move", (options, engine, player) => {
-    let character = engine.getCharacter(options.entity);
-    if (character !== void 0) {
-      character.goTo(options.target.x, options.target.y);
-    }
-  })
 }

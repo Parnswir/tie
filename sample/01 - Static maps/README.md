@@ -29,7 +29,7 @@ This looks really simple, but we won't need more for this example. The [styleshe
 ```js
 // index.js
 import TileEngine from '../../src/engine'; // or wherever the engine directory is
-import {MapLoader} from '../../src/map';
+import MapLoader from '../../src/map';
 
 // Load the map and provide it to a new TileEngine instance:
 MapLoader.load('./map.json').then((map) => {

@@ -1,7 +1,7 @@
 import imageLoader from './jsiso/img/load';
 import jsonLoader from './jsiso/json/load';
 
-export class MapLoader {
+export default class MapLoader {
   constructor() {}
 
   static load(path) {

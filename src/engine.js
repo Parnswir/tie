@@ -166,7 +166,7 @@ export default function TileEngine (x, y, xrange, yrange, overrides) {
   }
 
   let getActions = () => {
-    return currentMap.actions;
+    return currentMap.actions || [];
   }
 
   let interact = (player, tile) => {

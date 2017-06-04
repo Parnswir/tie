@@ -1,8 +1,10 @@
 import imageLoader from './jsiso/img/load';
 import jsonLoader from './jsiso/json/load';
 
-export default function MapLoader() {
-  this.load = (path) => {
+export class MapLoader {
+  constructor() {}
+
+  static load(path) {
     return jsonLoader([path])
       .then(function(maps) {
         let map = maps[0];

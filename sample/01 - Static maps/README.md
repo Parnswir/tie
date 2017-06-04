@@ -29,10 +29,10 @@ This looks really simple, but we won't need more for this example. The [styleshe
 ```js
 // index.js
 import TileEngine from '../../src/engine'; // or wherever the engine directory is
-import MapLoader from '../../src/map';
+import {MapLoader} from '../../src/map';
 
 // Load the map and provide it to a new TileEngine instance:
-(new MapLoader()).load('./map.json').then((map) => {
+MapLoader.load('./map.json').then((map) => {
     let tileEngine = new TileEngine(
       // Engine viewport:
       0,          // start rendering at x=0

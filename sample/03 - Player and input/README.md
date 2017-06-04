@@ -95,7 +95,7 @@ import MapLoader from '../../src/map';
 });
 ```
 
-Nice, our little character move around when you press the arrow keys on your keyboard. If you want mouse or touch input, use `enableMouseInput: true`. They can be used at the same time, too. You will notice that the character will try to stay on tiles when moving somewhere. This is by design. Use a multiple of your map's tile width and height for the player sprites for the best results.
+Nice, our little character moves around when you press the arrow keys on your keyboard. If you want mouse or touch input, use `enableMouseInput: true`. They can be used at the same time, too. You will notice that the character will try to stay on tiles when moving somewhere. This is by design. Use a multiple of your map's tile width and height for the player sprites for the best results.
 
 You can control the speed of the movement by setting the parameter `speed`. `x`, `y`, and `direction` can be set as well.
 

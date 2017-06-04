@@ -1,6 +1,9 @@
-export default class Player {
+import EventEmitting from './EventEmitter';
+
+export default class Player extends EventEmitting(Object) {
 
   constructor(context, properties, x=0, y=0, pathfind) {
+    super();
 
     let self = this;
     let options = properties;
@@ -23,7 +26,7 @@ export default class Player {
     this.getDirection = () => direction;
     this.setDirection = (where) => {
       direction = where % 4;
-      createEvent("setDirection", direction);
+      this.createEvent("setDirection", direction);
     }
 
     let path = [];
@@ -36,47 +39,8 @@ export default class Player {
     let getFrameX = (offset) => pos.x - options.files[0].width / 2 + offset.x;
     let getFrameY = (offset) => pos.y - options.files[0].height / 2 + offset.y;
 
-    let once = function (event, id, handler) {
-      return function () {
-        handler.apply(this.arguments);
-        self.off(event, id);
-      }
-    }
-
-    let handlers = {};
-    this.on = (event, handler) => {
-      let id = Date.now();
-      let element;
-      if (event.startsWith('once:')) {
-        event = event.replace('once:', '');
-        element = {id, 'handler': once(event, id, handler)};
-      } else {
-        element = {id, handler};
-      }
-      if (!handlers[event]) {
-        handlers[event] = [];
-      }
-      handlers[event].push(element);
-      return id;
-    };
-
-    this.off = (event, id) => {
-      let h = handlers[event] || [];
-      if (id) {
-        h = h.filter((e) => e.id === id);
-      }
-      h.forEach((element) => handlers[event].splice(h.indexOf(element), 1));
-    };
-
-    let createEvent = function (name, event) {
-      let h = handlers[name];
-      if (h) {
-        h.forEach((entry) => entry.handler(self, event));
-      }
-    }
-
     this.goTo = function (x, y) {
-      createEvent("goTo", {x, y});
+      this.createEvent("goTo", {x, y});
       pathfind(options.id, [tile.x, tile.y], [x, y], options.pathfindingLayer.getLayout(), false, false)
         .then(function (data) {
           if (data.length > 0 && data[1] !== undefined) {
@@ -135,7 +99,7 @@ export default class Player {
 
         if (inPosX && inPosY) {
           path.shift();
-          createEvent("pathComplete", path);
+          this.createEvent("pathComplete", path);
         } else {
           if (!inPosX) {
             let modifier = (targetX - pos.x) / Math.abs(targetX - pos.x);
@@ -150,13 +114,13 @@ export default class Player {
         }
       } else {
         if (hadPath) {
-          createEvent("movementComplete");
+          this.createEvent("movementComplete");
           hadPath = false;
         }
       }
       tile = options.layer.getXYCoords(pos.x, pos.y);
       if (tile.x !== previousTile.x || tile.y !== previousTile.y) {
-        createEvent("changeTile", tile);
+        this.createEvent("changeTile", tile);
         previousTile = tile;
       }
     };

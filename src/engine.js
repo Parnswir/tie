@@ -7,6 +7,7 @@ import pathfind from './jsiso/pathfind/pathfind';
 
 import Player from './player';
 import ActionExecutor from './action';
+import EventEmitting from './EventEmitter';
 
 let requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
@@ -46,9 +47,11 @@ let createElements = (container, names, outputEnabled=false) => {
   appendHtml(container, elements);
 }
 
-export default class TileEngine {
+export default class TileEngine extends EventEmitting(Object) {
 
   constructor(x, y, xrange, yrange, overrides) {
+    super();
+
     let self = this;
     overrides = Object.assign({}, overrides);
 
@@ -205,6 +208,14 @@ export default class TileEngine {
       }
     }
 
+    let drawPlayer = (player) => {
+      player.draw();
+      player.move();
+      if (player.useLighting) {
+        setPlayerLighting(player.getTile());
+      }
+    }
+
     let previousTime = 0;
     let timeToDraw = (time) => !overrides.lockedFrameRate || (time - previousTime) >= 1000 / overrides.lockedFrameRate;
 
@@ -214,20 +225,18 @@ export default class TileEngine {
       } else {
         previousTime = time;
         context.clearRect(0, 0, controlWidth, controlHeight);
-        let thingsToDraw = mapLayers.concat(players).sort((a, b) => a.zIndex > b.zIndex);
+        let comparator = (a, b) => a.zIndex > b.zIndex;
+        let thingsToDraw = mapLayers.sort(comparator);
+        let playersToDraw = players.slice().sort(comparator);
         for (let thing of thingsToDraw) {
-          if (thing instanceof Player) {
-            thing.draw();
-            thing.move();
-            if (thing.useLighting) {
-              setPlayerLighting(thing.getTile());
-            }
-          } else {
-            if (thing.visible) {
-              drawLayer(thing);
-            }
+          while (playersToDraw.length > 0 && playersToDraw[0].zIndex < thing.zIndex) {
+            drawPlayer(playersToDraw.shift());
+          }
+          if (thing.visible) {
+            drawLayer(thing);
           }
         }
+        playersToDraw.forEach(drawPlayer);
         drawMessages();
         if (!paused) {
           requestAnimationFrame(draw);
@@ -296,7 +305,7 @@ export default class TileEngine {
             });
             players.push(player);
             playerMap[characterId] = player;
-          }));
+          }).catch(console.error));
         }
       }
       return Promise.all(promises);

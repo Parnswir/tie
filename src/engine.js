@@ -9,8 +9,11 @@ import Player from './player';
 import ActionExecutor from './action';
 import EventEmitting from './EventEmitter';
 
+import TextOutput from './extensions/TextOutput';
 import KeyboardInput from './extensions/KeyboardInput';
 import MouseInput from './extensions/MouseInput';
+
+import {appendHtml} from './util';
 
 let requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
@@ -23,32 +26,7 @@ let requestAnimFrame = (function() {
   };
 })();
 
-const ELEMENT_NAMES = {
-  containerName: 'container',
-  frameName: 'text-frame',
-  messageName: 'text-message',
-  indicatorName: 'text-indicator'
-};
-
-let appendHtml = (el, str) => {
-  let div = document.createElement('div');
-  div.innerHTML = str;
-  while (div.children.length > 0) {
-    el.appendChild(div.children[0]);
-  }
-}
-
-let createElements = (container, names, outputEnabled=false) => {
-  let elements = '<div id="' + names.containerName + '"></div>';
-  if (outputEnabled) {
-    elements += '\
-      <div class="text-frame" id="' + names.frameName + '">\
-        <span class="text-message" id="' + names.messageName + '"></span>\
-        <span id="' + names.indicatorName + '">▼</span>\
-      </div>';
-  }
-  appendHtml(container, elements);
-}
+const CONTAINER_NAME = 'container';
 
 export default class TileEngine extends EventEmitting(Object) {
 
@@ -59,20 +37,14 @@ export default class TileEngine extends EventEmitting(Object) {
     overrides = Object.assign({}, overrides);
 
     let parent = overrides.parent || document.body;
-    let elementNames = Object.assign(ELEMENT_NAMES, overrides.customElementNames);
     if (!overrides.useCustomElements) {
-      createElements(parent, elementNames, overrides.enableTextOutput);
+      appendHtml(parent, '<div id="' + CONTAINER_NAME + '"></div>');
     }
-    const container = document.getElementById(elementNames.containerName);
-
-    let textMessages = [];
-    const textMessageFrame = document.getElementById(elementNames.frameName);
-    const textMessage = document.getElementById(elementNames.messageName);
-    const textIndicator = document.getElementById(elementNames.indicatorName)
+    const container = document.getElementById(CONTAINER_NAME);
 
     const controlWidth = container.clientWidth;
     const controlHeight = container.clientHeight;
-    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, elementNames.containerName, true);
+    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, CONTAINER_NAME, true);
 
     let currentMap;
 
@@ -91,57 +63,13 @@ export default class TileEngine extends EventEmitting(Object) {
       })
     });
 
-    let clearText = function () {};
-    let displayText = function () {};
-    let drawMessages = function () {};
-
-    if (overrides.enableTextOutput) {
-      textMessageFrame.onclick = () => {
-        if (paused) {
-          drawMessages();
-        }
-      };
-
-      clearText = () => {
-        textMessages = [];
-        textMessageFrame.classList.remove("in");
-        textMessage.innerHTML = "";
-        textIndicator.classList.remove("in");
-        if (paused) {
-          unpause();
-        }
-      }
-
-      displayText = (text) => {
-        textMessages = textMessages.concat(text);
-      }
-
-      drawMessages = () => {
-        if (textMessages.length > 0) {
-          pause();
-          let text = textMessages.splice(0, 1)[0];
-          textMessage.innerHTML = text;
-          if (!("in" in textMessageFrame.classList)) {
-            textMessageFrame.classList.add("in");
-          }
-          if (textMessages.length >= 1) {
-            textIndicator.classList.add("in");
-          } else {
-            textIndicator.classList.remove("in");
-          }
-        } else {
-          clearText();
-        }
-      }
-    }
-
     let getActions = () => {
       return currentMap.actions || [];
     }
 
     let interact = (player, tile) => {
       if (paused) {
-        drawMessages();
+        this.drawMessages();
       } else {
         if (!player.isMoving()) {
           getActions()
@@ -206,7 +134,7 @@ export default class TileEngine extends EventEmitting(Object) {
           }
         }
         playersToDraw.forEach(drawPlayer);
-        drawMessages();
+        this.drawMessages();
         if (!paused) {
           requestAnimationFrame(draw);
         }
@@ -288,12 +216,14 @@ export default class TileEngine extends EventEmitting(Object) {
           if (overrides.enableKeyboardInput) {
             KeyboardInput(input, self, player);
           }
+          if (overrides.enableTextOutput) {
+            TextOutput(parent, self, overrides);
+          }
         })
         .catch(console.error);
     }
 
     this.init = init;
-    this.displayText = displayText;
     this.pause = pause;
     this.unpause = unpause;
     this.paused = paused;
@@ -302,5 +232,17 @@ export default class TileEngine extends EventEmitting(Object) {
 
     this.actionExecutor = actionExecutor;
     this.currentMap = currentMap;
+
+    this.clearText = () => {
+      this.createEvent('clearText', arguments);
+    }
+
+    this.displayText = () => {
+      this.createEvent('displayText', arguments);
+    }
+
+    this.drawMessages = () => {
+      this.createEvent('drawMessages', arguments);
+    }
   }
 }

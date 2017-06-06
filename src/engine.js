@@ -9,6 +9,8 @@ import Player from './player';
 import ActionExecutor from './action';
 import EventEmitting from './EventEmitter';
 
+import KeyboardInput from './extensions/KeyboardInput';
+
 let requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
   window.webkitRequestAnimationFrame  ||
@@ -149,37 +151,20 @@ export default class TileEngine extends EventEmitting(Object) {
       });
     }
 
-    if (overrides.enableKeyboardInput) {
-      input.keyboard(function(pressed, status) {
-        let player = getCharacter('player');
-        if (status) {
-          if (paused) {
-            if ([13, 32].indexOf(pressed) >= 0) {
-              drawMessages();
-            }
-          } else {
-            switch (pressed) {
-              case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;
-              case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
-              case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
-              case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
-              case 13: case 32: interact(player, player.getLookedAtTile()); break;
-            }
-          }
-        }
-      });
-    }
-
     let getActions = () => {
       return currentMap.actions || [];
     }
 
     let interact = (player, tile) => {
-      if (!player.isMoving()) {
-        getActions()
-          .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
-          .filter((action) => action.x === tile.x && action.y == tile.y)
-          .forEach((action) => actionExecutor.execute(action, self, player));
+      if (paused) {
+        drawMessages();
+      } else {
+        if (!player.isMoving()) {
+          getActions()
+            .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
+            .filter((action) => action.x === tile.x && action.y == tile.y)
+            .forEach((action) => actionExecutor.execute(action, self, player));
+        }
       }
     };
 
@@ -308,7 +293,12 @@ export default class TileEngine extends EventEmitting(Object) {
           }).catch(console.error));
         }
       }
-      return Promise.all(promises);
+      return Promise.all(promises)
+        .then(() => {
+          if (overrides.enableKeyboardInput) {
+            KeyboardInput(input, self, getCharacter('player'));
+          }
+        });
     }
 
     this.init = init;
@@ -316,6 +306,7 @@ export default class TileEngine extends EventEmitting(Object) {
     this.pause = pause;
     this.unpause = unpause;
     this.getCharacter = getCharacter;
+    this.interact = interact;
 
     this.actionExecutor = actionExecutor;
     this.currentMap = currentMap;

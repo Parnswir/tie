@@ -290,7 +290,7 @@ export default class TileEngine extends EventEmitting(Object) {
             });
             players.push(player);
             playerMap[characterId] = player;
-          }).catch(console.error));
+          }));
         }
       }
       return Promise.all(promises)
@@ -298,7 +298,8 @@ export default class TileEngine extends EventEmitting(Object) {
           if (overrides.enableKeyboardInput) {
             KeyboardInput(input, self, getCharacter('player'));
           }
-        });
+        })
+        .catch(console.error);
     }
 
     this.init = init;

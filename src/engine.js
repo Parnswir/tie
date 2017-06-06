@@ -10,6 +10,7 @@ import ActionExecutor from './action';
 import EventEmitting from './EventEmitter';
 
 import KeyboardInput from './extensions/KeyboardInput';
+import MouseInput from './extensions/MouseInput';
 
 let requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
@@ -132,23 +133,6 @@ export default class TileEngine extends EventEmitting(Object) {
           clearText();
         }
       }
-    }
-
-    const input = new CanvasInput(document, CanvasControl());
-    if (overrides.enableMouseInput) {
-      input.mouse_action(function(coords) {
-        if (paused) {
-          drawMessages()
-        } else {
-          let player = getCharacter('player');
-          let layer = player.properties.layer;
-          let t = layer.applyMouseFocus(coords.x, coords.y);
-          player.goTo(t.x, t.y);
-          if (Math.abs(t.x - player.getTile().x) + Math.abs(t.y - player.getTile().y) === 1) {
-            interact(player, t);
-          }
-        }
-      });
     }
 
     let getActions = () => {
@@ -295,8 +279,14 @@ export default class TileEngine extends EventEmitting(Object) {
       }
       return Promise.all(promises)
         .then(() => {
+          const input = new CanvasInput(document, CanvasControl());
+          const player = getCharacter('player');
+
+          if (overrides.enableMouseInput) {
+            MouseInput(input, self, player);
+          }
           if (overrides.enableKeyboardInput) {
-            KeyboardInput(input, self, getCharacter('player'));
+            KeyboardInput(input, self, player);
           }
         })
         .catch(console.error);
@@ -306,6 +296,7 @@ export default class TileEngine extends EventEmitting(Object) {
     this.displayText = displayText;
     this.pause = pause;
     this.unpause = unpause;
+    this.paused = paused;
     this.getCharacter = getCharacter;
     this.interact = interact;
 

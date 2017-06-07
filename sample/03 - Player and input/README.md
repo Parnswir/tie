@@ -87,12 +87,9 @@ Cool. Now let's enable movement.
 ```js
 // index.js
 import TileEngine from '../../src/engine';
-import MapLoader from '../../src/map';
 
-MapLoader.load('./map.json').then((map) => {
-    let tileEngine = new TileEngine(0, 0, map.height, map.width, {enableKeyboardInput: true});
-    tileEngine.init(map);
-});
+let tileEngine = new TileEngine(0, 0, 5, 5, {enableKeyboardInput: true});
+tileEngine.init('./map.json');
 ```
 
 Nice, our little character moves around when you press the arrow keys on your keyboard. If you want mouse or touch input, use `enableMouseInput: true`. They can be used at the same time, too. You will notice that the character will try to stay on tiles when moving somewhere. This is by design. Use a multiple of your map's tile width and height for the player sprites for the best results.

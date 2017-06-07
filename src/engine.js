@@ -1,3 +1,5 @@
+const merge = require('deepmerge');
+
 import CanvasControl from './jsiso/canvas/Control';
 import CanvasInput from './jsiso/canvas/Input';
 import imgLoader from './jsiso/img/load';
@@ -170,13 +172,13 @@ export default class TileEngine extends EventEmitting(Object) {
       playerMap = {};
     }
 
-    this.load = (map) => {
-      return MapLoader.load(map).then((map) => {
+    this.load = (mapPath, options={}) => {
+      return MapLoader.load(mapPath).then((map) => {
         this.reset();
-        currentMap = map;
-        mapLayers = map.layers.map(initLayer);
+        currentMap = merge(map, options);
+        mapLayers = currentMap.layers.map(initLayer);
         let promises = [];
-        let characters = map.characters || {};
+        let characters = currentMap.characters || {};
         for (let characterId of Object.keys(characters)) {
           let playerOptions = characters[characterId];
           if (playerOptions) {
@@ -189,9 +191,9 @@ export default class TileEngine extends EventEmitting(Object) {
             }]).then((playerImages) => {
               playerOptions.files = playerImages[0].files;
               playerOptions.layer = mapLayers[0];
-              playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(map);
-              playerOptions.tileWidth = map.tileWidth;
-              playerOptions.tileHeight = map.tileHeight;
+              playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(currentMap);
+              playerOptions.tileWidth = currentMap.tileWidth;
+              playerOptions.tileHeight = currentMap.tileHeight;
 
               let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
               player.on("changeTile", (p, tile) => {
@@ -211,7 +213,7 @@ export default class TileEngine extends EventEmitting(Object) {
     }
 
     this.init = (map) => {
-      this.actionExecutor.registerAction('changeMap', (options) => this.load(options.map));
+      this.actionExecutor.registerAction('changeMap', (options) => this.load(options.map, options.override));
       return this.load(map).then(() => {
         draw()
 

@@ -174,7 +174,14 @@
       "type": "positional",
       "next": {
         "type": "changeMap",
-        "map": "./assets/maps/house1.json"
+        "map": "./assets/maps/house1.json",
+        "override": {
+          "characters": {
+            "player": {
+              "y": 5
+            }
+          }
+        }
       }
     }
   ]

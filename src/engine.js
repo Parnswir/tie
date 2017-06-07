@@ -9,6 +9,12 @@ import Player from './player';
 import ActionExecutor from './action';
 import EventEmitting from './EventEmitter';
 
+import TextOutput from './extensions/TextOutput';
+import KeyboardInput from './extensions/KeyboardInput';
+import MouseInput from './extensions/MouseInput';
+
+import {appendHtml, computeOnce} from './util';
+
 let requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
   window.webkitRequestAnimationFrame  ||
@@ -20,32 +26,7 @@ let requestAnimFrame = (function() {
   };
 })();
 
-const ELEMENT_NAMES = {
-  containerName: 'container',
-  frameName: 'text-frame',
-  messageName: 'text-message',
-  indicatorName: 'text-indicator'
-};
-
-let appendHtml = (el, str) => {
-  let div = document.createElement('div');
-  div.innerHTML = str;
-  while (div.children.length > 0) {
-    el.appendChild(div.children[0]);
-  }
-}
-
-let createElements = (container, names, outputEnabled=false) => {
-  let elements = '<div id="' + names.containerName + '"></div>';
-  if (outputEnabled) {
-    elements += '\
-      <div class="text-frame" id="' + names.frameName + '">\
-        <span class="text-message" id="' + names.messageName + '"></span>\
-        <span id="' + names.indicatorName + '">▼</span>\
-      </div>';
-  }
-  appendHtml(container, elements);
-}
+const CONTAINER_NAME = 'container';
 
 export default class TileEngine extends EventEmitting(Object) {
 
@@ -56,20 +37,14 @@ export default class TileEngine extends EventEmitting(Object) {
     overrides = Object.assign({}, overrides);
 
     let parent = overrides.parent || document.body;
-    let elementNames = Object.assign(ELEMENT_NAMES, overrides.customElementNames);
     if (!overrides.useCustomElements) {
-      createElements(parent, elementNames, overrides.enableTextOutput);
+      appendHtml(parent, '<div id="' + CONTAINER_NAME + '"></div>');
     }
-    const container = document.getElementById(elementNames.containerName);
-
-    let textMessages = [];
-    const textMessageFrame = document.getElementById(elementNames.frameName);
-    const textMessage = document.getElementById(elementNames.messageName);
-    const textIndicator = document.getElementById(elementNames.indicatorName)
+    const container = document.getElementById(CONTAINER_NAME);
 
     const controlWidth = container.clientWidth;
     const controlHeight = container.clientHeight;
-    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, elementNames.containerName, true);
+    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, CONTAINER_NAME, true);
 
     let currentMap;
 
@@ -88,107 +63,30 @@ export default class TileEngine extends EventEmitting(Object) {
       })
     });
 
-    let clearText = function () {};
-    let displayText = function () {};
-    let drawMessages = function () {};
-
-    if (overrides.enableTextOutput) {
-      textMessageFrame.onclick = () => {
-        if (paused) {
-          drawMessages();
-        }
-      };
-
-      clearText = () => {
-        textMessages = [];
-        textMessageFrame.classList.remove("in");
-        textMessage.innerHTML = "";
-        textIndicator.classList.remove("in");
-        if (paused) {
-          unpause();
-        }
-      }
-
-      displayText = (text) => {
-        textMessages = textMessages.concat(text);
-      }
-
-      drawMessages = () => {
-        if (textMessages.length > 0) {
-          pause();
-          let text = textMessages.splice(0, 1)[0];
-          textMessage.innerHTML = text;
-          if (!("in" in textMessageFrame.classList)) {
-            textMessageFrame.classList.add("in");
-          }
-          if (textMessages.length >= 1) {
-            textIndicator.classList.add("in");
-          } else {
-            textIndicator.classList.remove("in");
-          }
-        } else {
-          clearText();
-        }
-      }
-    }
-
-    const input = new CanvasInput(document, CanvasControl());
-    if (overrides.enableMouseInput) {
-      input.mouse_action(function(coords) {
-        if (paused) {
-          drawMessages()
-        } else {
-          let player = getCharacter('player');
-          let layer = player.properties.layer;
-          let t = layer.applyMouseFocus(coords.x, coords.y);
-          player.goTo(t.x, t.y);
-          if (Math.abs(t.x - player.getTile().x) + Math.abs(t.y - player.getTile().y) === 1) {
-            interact(player, t);
-          }
-        }
-      });
-    }
-
-    if (overrides.enableKeyboardInput) {
-      input.keyboard(function(pressed, status) {
-        let player = getCharacter('player');
-        if (status) {
-          if (paused) {
-            if ([13, 32].indexOf(pressed) >= 0) {
-              drawMessages();
-            }
-          } else {
-            switch (pressed) {
-              case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;
-              case 38: player.moveTo(player.getTile().x, player.getTile().y - 1); break;
-              case 39: player.moveTo(player.getTile().x + 1, player.getTile().y); break;
-              case 40: player.moveTo(player.getTile().x, player.getTile().y + 1); break;
-              case 13: case 32: interact(player, player.getLookedAtTile()); break;
-            }
-          }
-        }
-      });
-    }
-
-    let getActions = () => {
-      return currentMap.actions || [];
-    }
+    let getActions = () => currentMap.actions || [];
 
     let interact = (player, tile) => {
-      if (!player.isMoving()) {
-        getActions()
-          .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
-          .filter((action) => action.x === tile.x && action.y == tile.y)
-          .forEach((action) => actionExecutor.execute(action, self, player));
+      this.createEvent('interact', arguments);
+      if (paused) {
+        this.drawMessages();
+      } else {
+        if (!player.isMoving()) {
+          getActions()
+            .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
+            .filter((action) => action.x === tile.x && action.y == tile.y)
+            .forEach((action) => actionExecutor.execute(action, self, player));
+        }
       }
     };
 
     let pause = () => {
+      this.createEvent('pause');
       paused = true;
     }
 
     let unpause = () => {
       if (paused) {
+        this.createEvent('unpause');
         paused = false;
         draw();
       }
@@ -237,7 +135,7 @@ export default class TileEngine extends EventEmitting(Object) {
           }
         }
         playersToDraw.forEach(drawPlayer);
-        drawMessages();
+        this.drawMessages();
         if (!paused) {
           requestAnimationFrame(draw);
         }
@@ -252,16 +150,6 @@ export default class TileEngine extends EventEmitting(Object) {
       mapLayer.setLightmap(layer.lightmap);
       mapLayer = Object.assign(mapLayer, layer);
       return mapLayer;
-    }
-
-    let computeOnce = (fn) => {
-      var instance = void 0;
-      return function () {
-        if (instance === void 0) {
-          instance = fn.apply(this, arguments);
-        }
-        return instance;
-      }
     }
 
     let createEmptyLayer = computeOnce((map) => {
@@ -305,19 +193,47 @@ export default class TileEngine extends EventEmitting(Object) {
             });
             players.push(player);
             playerMap[characterId] = player;
-          }).catch(console.error));
+          }));
         }
       }
-      return Promise.all(promises);
+      return Promise.all(promises)
+        .then(() => {
+          const input = new CanvasInput(document, CanvasControl());
+          const player = getCharacter('player');
+
+          if (overrides.enableMouseInput) {
+            MouseInput(input, self, player);
+          }
+          if (overrides.enableKeyboardInput) {
+            KeyboardInput(input, self, player);
+          }
+          if (overrides.enableTextOutput) {
+            TextOutput(parent, self, overrides);
+          }
+        })
+        .catch(console.error);
     }
 
     this.init = init;
-    this.displayText = displayText;
     this.pause = pause;
     this.unpause = unpause;
+    this.paused = paused;
     this.getCharacter = getCharacter;
+    this.interact = interact;
 
     this.actionExecutor = actionExecutor;
     this.currentMap = currentMap;
+
+    this.clearText = () => {
+      this.createEvent('clearText', arguments);
+    }
+
+    this.displayText = () => {
+      this.createEvent('displayText', arguments);
+    }
+
+    this.drawMessages = () => {
+      this.createEvent('drawMessages', arguments);
+    }
   }
 }

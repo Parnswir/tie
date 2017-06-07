@@ -3,7 +3,6 @@ export default class ActionExecutor {
     this._actions = {};
     this.TYPE_POSITIONAL = "positional";
 
-    this.registerAction("text", (options, engine, player) => engine.displayText(options.text.split("\n")), true);
     this.registerAction("move", (options, engine, player) => {
       let character = engine.getCharacter(options.entity);
       if (character !== void 0) {

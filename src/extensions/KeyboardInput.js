@@ -1,5 +1,6 @@
-export default function (input, engine, player) {
+export default function (input, engine, playerName) {
   input.keyboard(function(pressed, status) {
+    let player = engine.getCharacter(playerName);
     if (status) {
       switch (pressed) {
         case 37: player.moveTo(player.getTile().x - 1, player.getTile().y); break;

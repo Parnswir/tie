@@ -13,7 +13,7 @@ import TextOutput from './extensions/TextOutput';
 import KeyboardInput from './extensions/KeyboardInput';
 import MouseInput from './extensions/MouseInput';
 
-import {appendHtml} from './util';
+import {appendHtml, computeOnce} from './util';
 
 let requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
@@ -63,9 +63,7 @@ export default class TileEngine extends EventEmitting(Object) {
       })
     });
 
-    let getActions = () => {
-      return currentMap.actions || [];
-    }
+    let getActions = () => currentMap.actions || [];
 
     let interact = (player, tile) => {
       if (paused) {
@@ -149,16 +147,6 @@ export default class TileEngine extends EventEmitting(Object) {
       mapLayer.setLightmap(layer.lightmap);
       mapLayer = Object.assign(mapLayer, layer);
       return mapLayer;
-    }
-
-    let computeOnce = (fn) => {
-      var instance = void 0;
-      return function () {
-        if (instance === void 0) {
-          instance = fn.apply(this, arguments);
-        }
-        return instance;
-      }
     }
 
     let createEmptyLayer = computeOnce((map) => {

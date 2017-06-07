@@ -13,4 +13,14 @@ let combine = function (a, b) {
   }
 }
 
-export {appendHtml, combine};
+let computeOnce = (fn) => {
+  let instance = void 0;
+  return function () {
+    if (instance === void 0) {
+      instance = fn.apply(this, arguments);
+    }
+    return instance;
+  }
+}
+
+export {appendHtml, combine, computeOnce};

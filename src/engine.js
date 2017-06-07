@@ -66,6 +66,7 @@ export default class TileEngine extends EventEmitting(Object) {
     let getActions = () => currentMap.actions || [];
 
     let interact = (player, tile) => {
+      this.createEvent('interact', arguments);
       if (paused) {
         this.drawMessages();
       } else {
@@ -79,11 +80,13 @@ export default class TileEngine extends EventEmitting(Object) {
     };
 
     let pause = () => {
+      this.createEvent('pause');
       paused = true;
     }
 
     let unpause = () => {
       if (paused) {
+        this.createEvent('unpause');
         paused = false;
         draw();
       }

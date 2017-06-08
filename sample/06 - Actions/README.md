@@ -19,6 +19,7 @@ There are some basic actions built-in:
 | move | Moves a character |
 | text | Displays text |
 | toggleTile | Changes a tile to the next one of a given set of options |
+| changeMap | Loads a new map file |
 
 Actions are defined in the map file:
 

@@ -109,7 +109,7 @@ Another use case for pathfinding is in automatic actions (and events, as we will
 ```js
 // index.js
   let tileEngine = new TileEngine(...);
-  tileEngine.init(map);
+  tileEngine.init('./map.json');
 
   // add this:
   document.getElementById('resetButton').addEventListener('click', (e) => {
@@ -196,7 +196,7 @@ Or consider this more complex variation, in which the NPC follows the player aft
 ```js
   // index.js
   // [...]
-  tileEngine.init(map).then(() => {
+  tileEngine.init('./map.json').then(() => {
     let player = tileEngine.getCharacter('player');
     let npc = tileEngine.getCharacter('example-npc');
 

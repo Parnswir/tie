@@ -1,3 +1,5 @@
+const merge = require('deepmerge');
+
 import CanvasControl from './jsiso/canvas/Control';
 import CanvasInput from './jsiso/canvas/Input';
 import imgLoader from './jsiso/img/load';
@@ -5,6 +7,7 @@ import jsonLoader from './jsiso/json/load';
 import TileField from './jsiso/tile/Field';
 import pathfind from './jsiso/pathfind/pathfind';
 
+import MapLoader from './map';
 import Player from './player';
 import ActionExecutor from './action';
 import EventEmitting from './EventEmitter';
@@ -45,6 +48,7 @@ export default class TileEngine extends EventEmitting(Object) {
     const controlWidth = container.clientWidth;
     const controlHeight = container.clientHeight;
     const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, CONTAINER_NAME, true);
+    const input = new CanvasInput(document, CanvasControl());
 
     let currentMap;
 
@@ -161,60 +165,72 @@ export default class TileEngine extends EventEmitting(Object) {
       return initLayer(layer);
     });
 
-    let init = (map) => {
-      currentMap = map;
-      mapLayers = map.layers.map(initLayer);
-      draw();
-      let promises = [];
-      let characters = map.characters || {};
-      for (let characterId of Object.keys(characters)) {
-        let playerOptions = characters[characterId];
-        if (playerOptions) {
-          promises.push(imgLoader([{
-            graphics: [playerOptions.sprites],
-            spritesheet: {
-              width: playerOptions.width,
-              height: playerOptions.height
-            }
-          }]).then((playerImages) => {
-            playerOptions.files = playerImages[0].files;
-            playerOptions.layer = mapLayers[0];
-            playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(map);
-            playerOptions.tileWidth = map.tileWidth;
-            playerOptions.tileHeight = map.tileHeight;
-
-            let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
-            player.on("changeTile", (p, tile) => {
-              getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
-                if (action.x === tile.x && action.y === tile.y) {
-                  actionExecutor.execute(action, self, p);
-                }
-              })
-            });
-            players.push(player);
-            playerMap[characterId] = player;
-          }));
-        }
-      }
-      return Promise.all(promises)
-        .then(() => {
-          const input = new CanvasInput(document, CanvasControl());
-          const player = getCharacter('player');
-
-          if (overrides.enableMouseInput) {
-            MouseInput(input, self, player);
-          }
-          if (overrides.enableKeyboardInput) {
-            KeyboardInput(input, self, player);
-          }
-          if (overrides.enableTextOutput) {
-            TextOutput(parent, self, overrides);
-          }
-        })
-        .catch(console.error);
+    this.reset = () => {
+      paused = false;
+      mapLayers = [];
+      players = [];
+      playerMap = {};
     }
 
-    this.init = init;
+    this.load = (mapPath, options={}) => {
+      return MapLoader.load(mapPath).then((map) => {
+        this.reset();
+        currentMap = merge(map, options);
+        mapLayers = currentMap.layers.map(initLayer);
+        let promises = [];
+        let characters = currentMap.characters || {};
+        for (let characterId of Object.keys(characters)) {
+          let playerOptions = characters[characterId];
+          if (playerOptions) {
+            promises.push(imgLoader([{
+              graphics: [playerOptions.sprites],
+              spritesheet: {
+                width: playerOptions.width,
+                height: playerOptions.height
+              }
+            }]).then((playerImages) => {
+              playerOptions.files = playerImages[0].files;
+              playerOptions.layer = mapLayers[0];
+              playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(currentMap);
+              playerOptions.tileWidth = currentMap.tileWidth;
+              playerOptions.tileHeight = currentMap.tileHeight;
+
+              let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
+              player.on("changeTile", (p, tile) => {
+                getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+                  if (action.x === tile.x && action.y === tile.y) {
+                    actionExecutor.execute(action, self, p);
+                  }
+                })
+              });
+              players.push(player);
+              playerMap[characterId] = player;
+            }));
+          }
+        }
+        return Promise.all(promises);
+      });
+    }
+
+    this.init = (map) => {
+      this.actionExecutor.registerAction('changeMap', (options) => this.load(options.map, options.override));
+      return this.load(map).then(() => {
+        draw()
+
+        const player = 'player';
+        if (overrides.enableMouseInput) {
+          MouseInput(input, self, player);
+        }
+        if (overrides.enableKeyboardInput) {
+          KeyboardInput(input, self, player);
+        }
+        if (overrides.enableTextOutput) {
+          TextOutput(parent, self, overrides);
+        }
+      })
+      .catch(console.error);
+    }
+
     this.pause = pause;
     this.unpause = unpause;
     this.paused = paused;

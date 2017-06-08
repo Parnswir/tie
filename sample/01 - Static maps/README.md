@@ -29,20 +29,15 @@ This looks really simple, but we won't need more for this example. The [styleshe
 ```js
 // index.js
 import TileEngine from '../../src/engine'; // or wherever the engine directory is
-import MapLoader from '../../src/map';
 
-// Load the map and provide it to a new TileEngine instance:
-MapLoader.load('./map.json').then((map) => {
-    let tileEngine = new TileEngine(
-      // Engine viewport:
-      0,          // start rendering at x=0
-      0,          // start rendering at y=0
-      map.width,  // render until x=map.width
-      map.height  // render until y=map.height
-    );
+// Create a new TileEngine instance:
+let tileEngine = new TileEngine(
+  // Engine viewport:
+  0, 0,  // start rendering at (x=0, y=0)
+  5, 5   // render until (x=4, y=4)
+);
 
-    tileEngine.init(map); // Rendering starts here
-});
+tileEngine.init('./map.json'); // Rendering starts here
 ```
 
 The [map](map.json) looks fairly easy too, it's a simple JSON-file. We'll discuss it step by step:

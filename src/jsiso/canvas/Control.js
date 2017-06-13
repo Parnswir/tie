@@ -1,4 +1,4 @@
-/*  
+/*
 Copyright (c) 2013 Iain Hamilton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,7 +17,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE. 
+THE SOFTWARE.
 */
 
 // Private properties for Control
@@ -64,7 +64,7 @@ function _create(name, w, h, style, element, usePixelRatio) {
     for (var s in style) {
       canvasElement.style[s] = style[s];
     }
-    console.log(usePixelRatio);
+
     canvasType = '2d';
     canvasElement.style.width = w + "px";
     canvasElement.style.height = h + "px";
@@ -107,7 +107,7 @@ function _fullScreen() {
   canvasElement.width = window.innerWidth;
   canvasElement.style.position = "absolute";
   canvasElement.style.zIndex = 100;
-  
+
   window.onresize = function(e){
     _update(0, 0);
     //I think we need a repaint here.

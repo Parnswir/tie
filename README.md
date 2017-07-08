@@ -16,5 +16,8 @@ The engine is based on ES6 modules, so if that's your thing, import it directly!
 You can also use [Webpack](http://webpack.js.org) to bundle it.
 Have a look at the [Webpack config file](webpack.config.js) or the official Webpack [Getting Started Guide](http://webpack.js.org/guides/get-started/) for how this works and install the dev-dependencies.
 
-If you have suggestions or complaints, please open an issue on Github.
+Please open an issue on Github for suggestions or bugs.
 If you would like to contribute, please send a pull-request.
+
+I would appreciate a short message if you do something cool with this engine in your own project.
+Please keep in mind that JSIso (i.e. everything in the `src/jsiso` directory) is licensed under the Apache License Version 2.0.

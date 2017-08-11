@@ -22,15 +22,16 @@ export default class JSONLoader {
       });
     }
 
-    function _load(path) {
-
-      let _loadNested = async function (obj, maxDepth=10) {
+    function _load(path, maxDepth=10) {
+      let _loadNested = async function (obj, maxDepth) {
         for (let property in obj) {
           if (obj.hasOwnProperty(property) && typeof(obj[property]) === 'object') {
             if (obj[property]['_load']) {
-              maxDepth -= 1;
-              let child = (await JSONLoader.load(obj[property]['_load']))[0];
-              obj[property] = merge(child, obj[property]['_override'] || {});
+              let child = await _load(obj[property]['_load'], maxDepth - 1);
+              if (obj[property]['_override']) {
+                child = merge(child, obj[property]['_override']);
+              }
+              obj[property] = child;
             } else {
               obj[property] = await _loadNested(obj[property], maxDepth);
             }
@@ -38,9 +39,12 @@ export default class JSONLoader {
         }
         return obj;
       }
+      if (maxDepth <= 0) {
+        throw 'Too many nested JSON merges!';
+      }
       return _jsonPromise(path)
-        .then((obj) => _loadNested(obj))
-        .catch((error) => {throw `Could not load map at ${path}.`});
+        .then((obj) => _loadNested(obj, maxDepth))
+        .catch((error) => {throw `Could not load map at ${path}.\n - ${error}`});
     }
 
     let promises = [];

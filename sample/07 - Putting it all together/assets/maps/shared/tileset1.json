@@ -1,0 +1,10 @@
+{
+  "name": "inside",
+  "image": "./assets/tilemaps/inside.png",
+  "imageheight": 160,
+  "imagewidth": 256,
+  "spacing": 0,
+  "firstgid": 1,
+  "tileWidth": 32,
+  "tileHeight": 32
+}

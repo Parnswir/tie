@@ -3,9 +3,10 @@ const webpack = require('webpack');
 
 module.exports = {
   context: path.resolve(__dirname, './src'),
-  entry: {
-    app: './engine.js',
-  },
+  entry: [
+    'babel-polyfill',
+    './engine.js',
+  ],
   module: {
     rules: [
       {
@@ -13,7 +14,10 @@ module.exports = {
         exclude: [/node_modules/],
         use: [{
           loader: 'babel-loader',
-          options: { presets: ['es2015'] },
+          options: {
+            presets: ['es2015'],
+            plugins: ['transform-async-to-generator']
+          },
         }],
       }
     ]

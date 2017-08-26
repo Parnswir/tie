@@ -1,0 +1,11 @@
+{
+  "sprites": "assets/player.png",
+  "width": 32,
+  "height": 32,
+  "zIndex": 5,
+  "pathfindingLayer": 3,
+  "movementFrameCount": 8,
+  "framesPerDirection": 4,
+  "useLighting": true,
+  "speed": 2
+}

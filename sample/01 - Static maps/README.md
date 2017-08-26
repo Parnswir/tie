@@ -121,6 +121,66 @@ Note that you have to adapt the `firstgid` option of the second tile set to star
 
 Or read the [second tutorial](../02%20-%20Layers) on what to do with them.
 
+### Want to re-use or share parts of the map? Here's what you do.
+
+Place the JSON object you want to share between multiple map files in a separate file. Let's assume we externalize a layer to `shared/my-layer.json`:
+
+`shared/my-layer.json`:
+```json
+  {
+    "tileset": 0,
+    "width": 3,
+    "height": 3,
+    "visible": true,
+    "layout": [
+      1, 1, 1,
+      1, 0, 1,
+      1, 1, 1
+    ]
+  }
+```
+
+Now you can use the layer inside multiple map files or multiple times in one map file, like in this example:
+
+`map.json`:
+```json
+  [...]
+  layers: [
+    {
+      "_load": "shared/my-layer.json",
+      "_override": {
+        "name": "First Layer",
+        "x": 7,
+        "y": 8
+      }
+    },
+    {
+      "_load": "shared/my-layer.json",
+      "_override": {
+        "name": "Second Layer",
+        "x": 1,
+        "y": 2
+      }
+    }
+  ]
+```
+
+The object containing the `_load` attribute will be replaced by the engine with the whole content of the specified file. After that, all attributes of the `_override` object are merged into the result. This allows to use a template object and populate it with local attributes, without copying all of the attributes around multiple locations and files.
+
+You can load any sub-tree from a map file:
+
+`map.json`:
+```json
+  [...]
+  layers: {
+    "_load": "shared/layers.json",
+    "_override": {}
+  }
+```
+
+You can load files with `_load` directives in them up to 10 levels deep.
+
+
 ### Ready for your own adventure?
 
 Go back to the [main page](../../README.md).

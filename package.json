@@ -15,5 +15,16 @@
   },
   "scripts": {
     "test": "ava"
+  },
+  "babel": {
+    "presets": ["es2015"],
+    "plugins": ["transform-async-to-generator"]
+  },
+  "ava": {
+    "babel": "inherit",
+    "require": [
+      "babel-polyfill",
+      "babel-register"
+    ]
   }
 }

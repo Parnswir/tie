@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/Parnswir/tie.svg?style=svg)](https://circleci.com/gh/Parnswir/tie)
+
 # TIE - A 2D Tile Engine Prototype
 
 This is a prototype of a 2D tile engine based on [JSIso](http://jsiso.com/), which both reduces the headaches of JSIso and adds useful features.

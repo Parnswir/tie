@@ -38,7 +38,7 @@ let EventEmitting = (superclass) => class extends superclass {
     this.createEvent = (name, event) => {
       let h = handlers[name];
       if (h) {
-        h.forEach((entry) => entry.handler(self, event));
+        h.forEach((entry) => entry.handler(this, event));
       }
     }
   }

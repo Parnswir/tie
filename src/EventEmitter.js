@@ -1,4 +1,4 @@
-let once = function (event, id, handler) {
+let once = function (self, event, id, handler) {
   return function () {
     handler.apply(this.arguments);
     self.off(event, id);
@@ -16,7 +16,7 @@ let EventEmitting = (superclass) => class extends superclass {
       let element;
       if (event.startsWith('once:')) {
         event = event.replace('once:', '');
-        element = {id, 'handler': once(event, id, handler)};
+        element = {id, 'handler': once(this, event, id, handler)};
       } else {
         element = {id, handler};
       }
@@ -38,7 +38,7 @@ let EventEmitting = (superclass) => class extends superclass {
     this.createEvent = (name, event) => {
       let h = handlers[name];
       if (h) {
-        h.forEach((entry) => entry.handler(self, event));
+        h.forEach((entry) => entry.handler(this, event));
       }
     }
   }

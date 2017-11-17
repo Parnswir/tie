@@ -25,7 +25,7 @@ export default class Player extends EventEmitting(Object) {
     let direction = options.direction || 0;
     this.getDirection = () => direction;
     this.setDirection = (where) => {
-      direction = where % 4;
+      direction = (where + 4) % 4;
       this.createEvent("setDirection", direction);
     }
 

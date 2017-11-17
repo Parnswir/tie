@@ -23,4 +23,6 @@ let computeOnce = (fn) => {
   }
 }
 
-export {appendHtml, combine, computeOnce};
+const noop = () => void 0;
+
+export {appendHtml, combine, computeOnce, noop};

@@ -1,5 +1,5 @@
 import test from 'ava';
-import {combine, computeOnce} from '../src/util';
+import {combine, computeOnce, noop} from '../src/util';
 
 test('#combine returns a function executing two functions and returning the result of the second', t => {
   let value = void 0;
@@ -17,4 +17,10 @@ test('#computeOnce returns a function that caches results of a computation', t =
   const result = fn();
   t.is(result, 1);
   t.is(result, fn());
+});
+
+test('#noop does nothing, throws nothing, and returns undefined', t => {
+  t.notThrows(noop);
+  const value = noop();
+  t.is(void 0, value);
 });

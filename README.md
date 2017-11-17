@@ -1,6 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Parnswir/tie.svg?style=svg)](https://circleci.com/gh/Parnswir/tie)
-
-# TIE - A 2D Tile Engine Prototype
+# TIE - A 2D Tile Engine Prototype [![CircleCI](https://circleci.com/gh/Parnswir/tie.svg?style=svg)](https://circleci.com/gh/Parnswir/tie) [![Coverage Status](https://coveralls.io/repos/github/Parnswir/tie/badge.svg?branch=master)](https://coveralls.io/github/Parnswir/tie?branch=master)
 
 This is a prototype of a 2D tile engine based on [JSIso](http://jsiso.com/), which both reduces the headaches of JSIso and adds useful features.
 Simple games can be created by supplying map files, complete with layers, z-order, collision detection, path-finding, lighting, and extensible scripting.

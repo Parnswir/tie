@@ -1,4 +1,6 @@
 import test from 'ava';
+import sinon from 'sinon';
+
 import ActionExecutor from '../src/action';
 import {noop} from '../src/util';
 
@@ -13,6 +15,8 @@ test('#registerAction works', t => {
 test('#registerAction does not register an action twice if not forced', t => {
   const ae = new ActionExecutor();
   const TYPE = 'test';
+  sinon.stub(console, 'warn');
+
   ae.registerAction(TYPE, noop);
   t.is(ae._actions[TYPE], noop);
   ae.registerAction(TYPE, () => 'foobar');

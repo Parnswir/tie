@@ -1,5 +1,3 @@
-const merge = require('deepmerge');
-
 import CanvasControl from './jsiso/canvas/Control';
 import CanvasInput from './jsiso/canvas/Input';
 import imgLoader from './jsiso/img/load';
@@ -16,7 +14,7 @@ import TextOutput from './extensions/TextOutput';
 import KeyboardInput from './extensions/KeyboardInput';
 import MouseInput from './extensions/MouseInput';
 
-import {appendHtml, computeOnce} from './util';
+import {appendHtml, computeOnce, merge} from './util';
 
 let requestAnimFrame = (function() {
   return window.requestAnimationFrame ||

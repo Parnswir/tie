@@ -6,19 +6,22 @@
     "babel-plugin-transform-async-to-generator": "^6.5.0",
     "babel-polyfill": "^6.5.0",
     "babel-preset-es2015": "^6.24.1",
+    "sinon": "^4.1.2",
     "webpack": "^2.4.1",
     "webpack-dev-server": "^2.4.5",
     "worker-loader": "^0.8.0"
   },
-  "dependencies": {
-    "deepmerge": "^1.3.2"
-  },
+  "dependencies": {},
   "scripts": {
     "test": "ava"
   },
   "babel": {
-    "presets": ["es2015"],
-    "plugins": ["transform-async-to-generator"]
+    "presets": [
+      "es2015"
+    ],
+    "plugins": [
+      "transform-async-to-generator"
+    ]
   },
   "ava": {
     "babel": "inherit",

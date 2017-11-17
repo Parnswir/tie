@@ -1,9 +1,11 @@
+import {noop} from 'util';
+
 export default class ActionExecutor {
   constructor() {
     this._actions = {};
-    this.TYPE_POSITIONAL = "positional";
+    this.TYPE_POSITIONAL = 'positional';
 
-    this.registerAction("move", (options, engine, player) => {
+    this.registerAction('move', (options, engine, player) => {
       let character = engine.getCharacter(options.entity);
       if (character !== void 0) {
         character.goTo(options.target.x, options.target.y);
@@ -11,11 +13,11 @@ export default class ActionExecutor {
     })
   }
 
-  registerAction(type, execute, override=false) {
+  registerAction(type='default', execute=noop, override=false) {
     if (override || !this._actions[type]) {
       this._actions[type] = execute;
     } else {
-      console.warn("Action already registered: ", type);
+      console.warn('Action already registered: ', type);
     }
   }
 

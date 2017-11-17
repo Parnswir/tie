@@ -2,10 +2,9 @@ import EventEmitting from './EventEmitter';
 
 export default class Player extends EventEmitting(Object) {
 
-  constructor(context, properties, x=0, y=0, pathfind) {
+  constructor(context, properties={}, x=0, y=0, pathfind) {
     super();
 
-    let self = this;
     let options = properties;
     options.tileWidth = options.tileWidth || 32;
     options.tileHeight = options.tileHeight || 32;
@@ -15,17 +14,18 @@ export default class Player extends EventEmitting(Object) {
 
     this.properties = options;
 
+    const texture = (options.files || [{width: options.tileWidth, height: options.tileHeight}])[0];
     let tile = {x, y};
     let pos = {
-      x: tile.x * options.tileWidth + options.files[0].width / 2,
-      y: tile.y * options.tileHeight + options.files[0].width / 2
+      x: tile.x * options.tileWidth + texture.width / 2,
+      y: tile.y * options.tileHeight + texture.height / 2
     };
 
     let speed = options.speed;
     let direction = options.direction || 0;
     this.getDirection = () => direction;
     this.setDirection = (where) => {
-      direction = where % 4;
+      direction = (where + 4) % 4;
       this.createEvent("setDirection", direction);
     }
 
@@ -36,8 +36,8 @@ export default class Player extends EventEmitting(Object) {
     let movementFrameTimer = Math.floor(Math.random() * options.movementFrameCount);
 
     let getFrame = () => options.files[options.framesPerDirection * direction + movementFrame];
-    let getFrameX = (offset) => pos.x - options.files[0].width / 2 + offset.x;
-    let getFrameY = (offset) => pos.y - options.files[0].height / 2 + offset.y;
+    let getFrameX = (offset) => pos.x - texture.width / 2 + offset.x;
+    let getFrameY = (offset) => pos.y - texture.height / 2 + offset.y;
 
     this.goTo = function (x, y) {
       this.createEvent("goTo", {x, y});
@@ -88,8 +88,8 @@ export default class Player extends EventEmitting(Object) {
         }
         let tileWidth = options.tileWidth;
         let tileHeight = options.tileHeight;
-        let frameWidth = options.files[0].width;
-        let frameHeight = options.files[0].height;
+        let frameWidth = texture.width;
+        let frameHeight = texture.height;
 
         let targetX = path[0].x * tileWidth + frameWidth / 2;
         let targetY = path[0].y * tileHeight + frameHeight / 2;

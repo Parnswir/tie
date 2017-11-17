@@ -10,15 +10,17 @@
     "webpack-dev-server": "^2.4.5",
     "worker-loader": "^0.8.0"
   },
-  "dependencies": {
-    "deepmerge": "^1.3.2"
-  },
+  "dependencies": {},
   "scripts": {
     "test": "ava"
   },
   "babel": {
-    "presets": ["es2015"],
-    "plugins": ["transform-async-to-generator"]
+    "presets": [
+      "es2015"
+    ],
+    "plugins": [
+      "transform-async-to-generator"
+    ]
   },
   "ava": {
     "babel": "inherit",

@@ -1,4 +1,4 @@
-const merge = require('deepmerge');
+import {merge} from './util';
 
 export default class JSONLoader {
 
@@ -44,7 +44,7 @@ export default class JSONLoader {
       }
       return _jsonPromise(path)
         .then((obj) => _loadNested(obj, maxDepth))
-        .catch((error) => {throw `Could not load map at ${path}.\n - ${error}`});
+        .catch((error) => {throw `Could not load JSON file at ${path}.\n - ${error}`});
     }
 
     let promises = [];

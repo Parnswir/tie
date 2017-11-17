@@ -1,5 +1,5 @@
 import {merge} from './util';
-import Request from './request';
+import {getResource} from './request';
 
 export default class JSONLoader {
 
@@ -27,7 +27,7 @@ export default class JSONLoader {
       if (maxDepth <= 0) {
         throw 'Too many nested JSON merges!';
       }
-      return Request.get(path)
+      return getResource(path)
         .then((obj) => _loadNested(obj, maxDepth))
         .catch((error) => {throw `Could not load JSON file at ${path}.\n - ${error}`});
     }

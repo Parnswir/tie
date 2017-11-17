@@ -1,26 +1,11 @@
 import {merge} from './util';
+import Request from './request';
 
 export default class JSONLoader {
 
   constructor() {}
 
   static load(...paths) {
-
-    function _jsonPromise(path) {
-       return new Promise(function(resolve, reject) {
-        let xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("GET", path, true);
-        xmlhttp.send();
-        xmlhttp.onload = function() {
-          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            resolve(JSON.parse(xmlhttp.responseText));
-          }
-          else {
-            reject();
-          }
-        };
-      });
-    }
 
     function _load(path, maxDepth=10) {
       let _loadNested = async function (obj, maxDepth) {
@@ -42,7 +27,7 @@ export default class JSONLoader {
       if (maxDepth <= 0) {
         throw 'Too many nested JSON merges!';
       }
-      return _jsonPromise(path)
+      return Request.get(path)
         .then((obj) => _loadNested(obj, maxDepth))
         .catch((error) => {throw `Could not load JSON file at ${path}.\n - ${error}`});
     }

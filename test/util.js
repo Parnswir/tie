@@ -1,5 +1,5 @@
 import test from 'ava';
-import {combine, computeOnce, noop} from '../src/util';
+import {combine, computeOnce, merge, noop} from '../src/util';
 
 test('#combine returns a function executing two functions and returning the result of the second', t => {
   let value = void 0;
@@ -23,4 +23,12 @@ test('#noop does nothing, throws nothing, and returns undefined', t => {
   t.notThrows(noop);
   const value = noop();
   t.is(void 0, value);
+});
+
+test('#merge deep merges objects', t => {
+  t.deepEqual(merge({foo: 'bar'}, {baz: 42}), {foo: 'bar', baz: 42});
+  t.deepEqual(merge({foo: 'bar'}, {foo: 'new bar'}), {foo: 'new bar'});
+  t.deepEqual(merge({foo: {bar: 'baz'}}, {foo: 'new bar'}), {foo: 'new bar'});
+  t.deepEqual(merge({foo: {bar: 'baz'}}, {foo: {bar: 'new baz'}}), {foo: {bar: 'new baz'}});
+  t.deepEqual(merge({foo: {bar: 'baz'}}, {foo: {hello: 'world'}}), {foo: {bar: 'baz', hello: 'world'}});
 });

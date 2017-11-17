@@ -95,3 +95,20 @@ test.serial('#load only merges 10 levels deep', async t => {
 
   await t.throws(JSONLoader.load('file1.json'));
 });
+
+test.serial('#load works for multiple files', async t => {
+  const FILE1 = {
+    foo: 'bar',
+    baz: 42
+  };
+  const FILE2 = {
+    'hello': 'world'
+  };
+  fakeRequest((file) => {
+    const resource = file === 'file1.json' ? FILE1 : FILE2;
+    return Promise.resolve(resource);
+  });
+
+  const result = await JSONLoader.load('file1.json', 'file2.json');
+  t.deepEqual(result, [FILE1, FILE2]);
+});

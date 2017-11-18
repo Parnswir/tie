@@ -27,12 +27,11 @@ export default class TileEngine extends EventEmitting(null) {
     this.overrides = Object.assign({}, overrides);
     this.prepareContainer();
 
-    this.context = CanvasControl.create("canvas", this.controlWidth, this.controlHeight, {}, CONTAINER_NAME, true);
-    this.input = new CanvasInput(document, CanvasControl());
 
     this.reset();
     this.initializeActionExecutor();
-    this.initializeRendering();
+    this.initializeRendering({x, y, xrange, yrange});
+    this.input = new CanvasInput(document, CanvasControl());
 
     let initLayer = (layer) => {
       let mapLayer = new TileField(this.context, this.controlWidth, this.controlHeight);
@@ -58,6 +57,7 @@ export default class TileEngine extends EventEmitting(null) {
         this.reset();
         this.currentMap = merge(map, options);
         this.mapLayers = this.currentMap.layers.map(initLayer);
+        this.renderer.layers = this.mapLayers;
         let promises = [];
         let characters = this.currentMap.characters || {};
         for (let characterId of Object.keys(characters)) {
@@ -155,8 +155,10 @@ export default class TileEngine extends EventEmitting(null) {
     });
   }
 
-  initializeRendering () {
-    this.renderer = new RenderingPipeline(this);
+  initializeRendering (args) {
+    this.context = CanvasControl.create("canvas", this.controlWidth, this.controlHeight, {}, CONTAINER_NAME, true);
+    this.renderer = new RenderingPipeline(this, args);
+    this.renderer.context = this.context;
     this.renderer.on('afterDraw', () => this.drawMessages());
   }
 

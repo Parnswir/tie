@@ -13,7 +13,7 @@ const requestAnimFrame = (function() {
 
 export default class RenderPipeline extends EventEmitting(null) {
 
-  constructor (engine) {
+  constructor (engine, {x, y, xrange, yrange}) {
     super();
     this.engine = engine;
 
@@ -21,21 +21,33 @@ export default class RenderPipeline extends EventEmitting(null) {
     this._stopped = true;
   }
 
+  get context () {return this._context}
+  set context (context) {
+    this.createEvent('changeContext', {renderer: this, context});
+    this._context = context;
+  }
+
+  get layers () {return this._layers || []}
+  set layers (layers) {
+    this.createEvent('changeLayers', {renderer: this, layers});
+    this._layers = layers;
+  }
+
   setPlayerLighting (tile) {
-    this.engine.mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
+    this.layers.forEach((layer) => layer.setLight(tile.x, tile.y));
   }
 
   drawLayer (layer) {
-    for (let i = 0; i < (layer.width || this.engine.xrange); i++) {
-      for (let j = 0; j < (layer.height || this.engine.yrange); j++) {
-        layer.draw(i, j, void 0, (layer.x || this.engine.x), (layer.y || this.engine.y));
+    for (let i = 0; i < (layer.width || this.xrange); i++) {
+      for (let j = 0; j < (layer.height || this.yrange); j++) {
+        layer.draw(i, j, void 0, (layer.x || this.x), (layer.y || this.y));
       }
     }
   }
 
   drawPlayer (player) {
-    player.draw();
-    player.move();
+    player.draw(this.context);
+    player.move(this.context);
     if (player.useLighting) {
       this.setPlayerLighting(player.getTile());
     }
@@ -48,13 +60,13 @@ export default class RenderPipeline extends EventEmitting(null) {
 
   draw (time) {
     if (!this.timeToDraw(time)) {
-      requestAnimationFrame(this.draw);
+      requestAnimationFrame(this.draw.bind(this));
     } else {
       this.createEvent('beforeDraw', this);
       this._lastRenderTime = time;
       this.engine.context.clearRect(0, 0, this.engine.controlWidth, this.engine.controlHeight);
       let comparator = (a, b) => a.zIndex > b.zIndex;
-      let thingsToDraw = this.engine.mapLayers.sort(comparator);
+      let thingsToDraw = this.layers.sort(comparator);
       let playersToDraw = this.engine.players.slice().sort(comparator);
       for (let thing of thingsToDraw) {
         while (playersToDraw.length > 0 && playersToDraw[0].zIndex < thing.zIndex) {
@@ -64,7 +76,7 @@ export default class RenderPipeline extends EventEmitting(null) {
           this.drawLayer(thing);
         }
       }
-      playersToDraw.forEach(this.drawPlayer);
+      playersToDraw.forEach(this.drawPlayer.bind(this));
       this.createEvent('afterDraw', this);
       if (this._stopped) {
         this.createEvent('stoppedRendering', this);

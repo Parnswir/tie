@@ -223,7 +223,7 @@ export default class TileEngine extends EventEmitting(Object) {
           KeyboardInput(input, self, player);
         }
         if (overrides.enableTextOutput) {
-          TextOutput(parent, self, overrides);
+          this.extensions.push(new TextOutput(parent, self, overrides));
         }
       })
       .catch(console.error);
@@ -235,6 +235,7 @@ export default class TileEngine extends EventEmitting(Object) {
     this.getCharacter = getCharacter;
     this.interact = interact;
 
+    this.extensions = [];
     this.actionExecutor = actionExecutor;
     this.currentMap = currentMap;
 

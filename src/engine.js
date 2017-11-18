@@ -37,27 +37,19 @@ export default class TileEngine extends EventEmitting(null) {
     this.overrides = Object.assign({}, overrides);
     this.prepareContainer();
 
-    const context = CanvasControl.create("canvas", this.controlWidth, this.controlHeight, {}, CONTAINER_NAME, true);
-    const input = new CanvasInput(document, CanvasControl());
+    this.context = CanvasControl.create("canvas", this.controlWidth, this.controlHeight, {}, CONTAINER_NAME, true);
+    this.input = new CanvasInput(document, CanvasControl());
 
-    let currentMap;
+    this.currentMap = void 0;
+    this.mapLayers = [];
 
     let paused = false;
-    let mapLayers = [];
     let players = [];
     let playerMap = {};
 
-    let actionExecutor = new ActionExecutor();
-    actionExecutor.registerAction('toggleTile', (options, engine, player) => {
-      let layers = mapLayers.filter((layer) => layer.zIndex === player.properties.zIndex);
-      layers.forEach((layer) => {
-        let currentTile = layer.getTile(options.target.x, options.target.y);
-        let currentIndex = options.tiles.indexOf(currentTile);
-        layer.setTile(options.target.x, options.target.y, options.tiles[(currentIndex + 1) % options.tiles.length]);
-      })
-    });
+    this.initializeActionExecutor();
 
-    let getActions = () => currentMap.actions || [];
+    let getActions = () => this.currentMap.actions || [];
 
     let interact = (player, tile) => {
       this.createEvent('interact', arguments);
@@ -66,9 +58,9 @@ export default class TileEngine extends EventEmitting(null) {
       } else {
         if (!player.isMoving()) {
           getActions()
-            .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
+            .filter((action) => action.type !== this.actionExecutor.TYPE_POSITIONAL)
             .filter((action) => action.x === tile.x && action.y == tile.y)
-            .forEach((action) => actionExecutor.execute(action, this, player));
+            .forEach((action) => this.actionExecutor.execute(action, this, player));
         }
       }
     };
@@ -89,7 +81,7 @@ export default class TileEngine extends EventEmitting(null) {
     let getCharacter = (id) => playerMap[id];
 
     let setPlayerLighting = (tile) => {
-      mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
+      this.mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
     }
 
     let drawLayer = (layer) => {
@@ -116,9 +108,9 @@ export default class TileEngine extends EventEmitting(null) {
         requestAnimationFrame(draw);
       } else {
         previousTime = time;
-        context.clearRect(0, 0, this.controlWidth, this.controlHeight);
+        this.context.clearRect(0, 0, this.controlWidth, this.controlHeight);
         let comparator = (a, b) => a.zIndex > b.zIndex;
-        let thingsToDraw = mapLayers.sort(comparator);
+        let thingsToDraw = this.mapLayers.sort(comparator);
         let playersToDraw = players.slice().sort(comparator);
         for (let thing of thingsToDraw) {
           while (playersToDraw.length > 0 && playersToDraw[0].zIndex < thing.zIndex) {
@@ -137,7 +129,7 @@ export default class TileEngine extends EventEmitting(null) {
     }
 
     let initLayer = (layer) => {
-      let mapLayer = new TileField(context, this.controlWidth, this.controlHeight);
+      let mapLayer = new TileField(this.context, this.controlWidth, this.controlHeight);
       mapLayer.setup(layer);
       mapLayer.flip("horizontal");
       mapLayer.rotate("left");
@@ -157,7 +149,7 @@ export default class TileEngine extends EventEmitting(null) {
 
     this.reset = () => {
       paused = false;
-      mapLayers = [];
+      this.mapLayers = [];
       players = [];
       playerMap = {};
     }
@@ -165,10 +157,10 @@ export default class TileEngine extends EventEmitting(null) {
     this.load = (mapPath, options={}) => {
       return MapLoader.load(mapPath).then((map) => {
         this.reset();
-        currentMap = merge(map, options);
-        mapLayers = currentMap.layers.map(initLayer);
+        this.currentMap = merge(map, options);
+        this.mapLayers = this.currentMap.layers.map(initLayer);
         let promises = [];
-        let characters = currentMap.characters || {};
+        let characters = this.currentMap.characters || {};
         for (let characterId of Object.keys(characters)) {
           let playerOptions = characters[characterId];
           if (playerOptions) {
@@ -180,16 +172,16 @@ export default class TileEngine extends EventEmitting(null) {
               }
             }]).then((playerImages) => {
               playerOptions.files = playerImages[0].files;
-              playerOptions.layer = mapLayers[0];
-              playerOptions.pathfindingLayer = mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(currentMap);
-              playerOptions.tileWidth = currentMap.tileWidth;
-              playerOptions.tileHeight = currentMap.tileHeight;
+              playerOptions.layer = this.mapLayers[0];
+              playerOptions.pathfindingLayer = this.mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(currentMap);
+              playerOptions.tileWidth = this.currentMap.tileWidth;
+              playerOptions.tileHeight = this.currentMap.tileHeight;
 
-              let player = new Player(context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
+              let player = new Player(this.context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
               player.on("changeTile", (p, tile) => {
-                getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+                getActions().filter((action) => action.type === this.actionExecutor.TYPE_POSITIONAL).forEach((action) => {
                   if (action.x === tile.x && action.y === tile.y) {
-                    actionExecutor.execute(action, this, p);
+                    this.actionExecutor.execute(action, this, p);
                   }
                 })
               });
@@ -209,10 +201,10 @@ export default class TileEngine extends EventEmitting(null) {
 
         const player = 'player';
         if (overrides.enableMouseInput) {
-          this.extensions.push(new MouseInput(input, this, player));
+          this.extensions.push(new MouseInput(this.input, this, player));
         }
         if (overrides.enableKeyboardInput) {
-          this.extensions.push(new KeyboardInput(input, this, player));
+          this.extensions.push(new KeyboardInput(this.input, this, player));
         }
         if (overrides.enableTextOutput) {
           this.extensions.push(new TextOutput(this.parent, this, overrides));
@@ -228,8 +220,6 @@ export default class TileEngine extends EventEmitting(null) {
     this.interact = interact;
 
     this.extensions = [];
-    this.actionExecutor = actionExecutor;
-    this.currentMap = currentMap;
 
     this.clearText = () => {
       this.createEvent('clearText', arguments);
@@ -252,5 +242,17 @@ export default class TileEngine extends EventEmitting(null) {
     this.container = document.getElementById(CONTAINER_NAME);
     this.controlWidth = this.container.clientWidth;
     this.controlHeight = this.container.clientHeight;
+  }
+
+  initializeActionExecutor () {
+    this.actionExecutor = new ActionExecutor();
+    this.actionExecutor.registerAction('toggleTile', (options, engine, player) => {
+      let layers = engine.mapLayers.filter((layer) => layer.zIndex === player.properties.zIndex);
+      layers.forEach((layer) => {
+        let currentTile = layer.getTile(options.target.x, options.target.y);
+        let currentIndex = options.tiles.indexOf(currentTile);
+        layer.setTile(options.target.x, options.target.y, options.tiles[(currentIndex + 1) % options.tiles.length]);
+      })
+    });
   }
 }

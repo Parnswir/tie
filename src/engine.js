@@ -217,10 +217,10 @@ export default class TileEngine extends EventEmitting(Object) {
 
         const player = 'player';
         if (overrides.enableMouseInput) {
-          MouseInput(input, self, player);
+          this.extensions.push(new MouseInput(input, self, player));
         }
         if (overrides.enableKeyboardInput) {
-          KeyboardInput(input, self, player);
+          this.extensions.push(new KeyboardInput(input, self, player));
         }
         if (overrides.enableTextOutput) {
           this.extensions.push(new TextOutput(parent, self, overrides));

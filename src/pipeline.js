@@ -17,7 +17,8 @@ export default class RenderPipeline extends EventEmitting(null) {
     super();
     this.engine = engine;
 
-    this.lastRenderTime = 0;
+    this._lastRenderTime = 0;
+    this._stopped = true;
   }
 
   setPlayerLighting (tile) {
@@ -42,14 +43,15 @@ export default class RenderPipeline extends EventEmitting(null) {
 
   timeToDraw (time) {
     return !this.engine.overrides.lockedFrameRate ||
-      (time - this.lastRenderTime) >= 1000 / this.engine.overrides.lockedFrameRate;
+      (time - this._lastRenderTime) >= 1000 / this.engine.overrides.lockedFrameRate;
   }
 
   draw (time) {
     if (!this.timeToDraw(time)) {
       requestAnimationFrame(this.draw);
     } else {
-      this.lastRenderTime = time;
+      this.createEvent('beforeDraw', this);
+      this._lastRenderTime = time;
       this.engine.context.clearRect(0, 0, this.engine.controlWidth, this.engine.controlHeight);
       let comparator = (a, b) => a.zIndex > b.zIndex;
       let thingsToDraw = this.engine.mapLayers.sort(comparator);
@@ -64,9 +66,22 @@ export default class RenderPipeline extends EventEmitting(null) {
       }
       playersToDraw.forEach(this.drawPlayer);
       this.createEvent('afterDraw', this);
-      if (!this.engine.paused) {
+      if (this._stopped) {
+        this.createEvent('stoppedRendering', this);
+      } else {
         requestAnimationFrame(this.draw.bind(this));
       }
     }
+  }
+
+  start () {
+    this.createEvent('startRendering', this);
+    this._stopped = false;
+    this.draw();
+  }
+
+  stop () {
+    this.createEvent('stopRendering', this);
+    this._stopped = true;
   }
 }

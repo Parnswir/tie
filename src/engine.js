@@ -95,7 +95,7 @@ export default class TileEngine extends EventEmitting(null) {
     this.init = (map) => {
       this.actionExecutor.registerAction('changeMap', (options) => this.load(options.map, options.override));
       return this.load(map).then(() => {
-        this.renderer.draw()
+        this.renderer.start()
 
         const player = 'player';
         if (overrides.enableMouseInput) {
@@ -190,13 +190,14 @@ export default class TileEngine extends EventEmitting(null) {
   pause () {
     this.createEvent('pause');
     this.paused = true;
+    this.renderer.stop();
   }
 
   unpause () {
     if (this.paused) {
       this.createEvent('unpause');
       this.paused = false;
-      this.renderer.draw();
+      this.renderer.start();
     }
   }
 }

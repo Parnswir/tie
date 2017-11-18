@@ -9,23 +9,13 @@ import MapLoader from './map';
 import Player from './player';
 import ActionExecutor from './action';
 import EventEmitting from './EventEmitter';
+import RenderingPipeline from './pipeline';
 
 import TextOutput from './extensions/TextOutput';
 import KeyboardInput from './extensions/KeyboardInput';
 import MouseInput from './extensions/MouseInput';
 
 import {appendHtml, computeOnce, merge} from './util';
-
-const requestAnimFrame = (function() {
-  return window.requestAnimationFrame ||
-  window.webkitRequestAnimationFrame  ||
-  window.mozRequestAnimationFrame     ||
-  window.oRequestAnimationFrame       ||
-  window.msRequestAnimationFrame      ||
-  function(callback, element) {
-    window.setTimeout(callback, 1000 / 60);
-  };
-})();
 
 const CONTAINER_NAME = 'container';
 
@@ -42,54 +32,7 @@ export default class TileEngine extends EventEmitting(null) {
 
     this.reset();
     this.initializeActionExecutor();
-
-    let setPlayerLighting = (tile) => {
-      this.mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
-    }
-
-    let drawLayer = (layer) => {
-      for (let i = 0; i < (layer.width || xrange); i++) {
-        for (let j = 0; j < (layer.height || yrange); j++) {
-          layer.draw(i, j, void 0, (layer.x || x), (layer.y || y));
-        }
-      }
-    }
-
-    let drawPlayer = (player) => {
-      player.draw();
-      player.move();
-      if (player.useLighting) {
-        setPlayerLighting(player.getTile());
-      }
-    }
-
-    let previousTime = 0;
-    let timeToDraw = (time) => !overrides.lockedFrameRate || (time - previousTime) >= 1000 / overrides.lockedFrameRate;
-
-    let draw = (time) => {
-      if (!timeToDraw(time)) {
-        requestAnimationFrame(draw);
-      } else {
-        previousTime = time;
-        this.context.clearRect(0, 0, this.controlWidth, this.controlHeight);
-        let comparator = (a, b) => a.zIndex > b.zIndex;
-        let thingsToDraw = this.mapLayers.sort(comparator);
-        let playersToDraw = this.players.slice().sort(comparator);
-        for (let thing of thingsToDraw) {
-          while (playersToDraw.length > 0 && playersToDraw[0].zIndex < thing.zIndex) {
-            drawPlayer(playersToDraw.shift());
-          }
-          if (thing.visible) {
-            drawLayer(thing);
-          }
-        }
-        playersToDraw.forEach(drawPlayer);
-        this.drawMessages();
-        if (!this.paused) {
-          requestAnimationFrame(draw);
-        }
-      }
-    }
+    this.initializeRendering();
 
     let initLayer = (layer) => {
       let mapLayer = new TileField(this.context, this.controlWidth, this.controlHeight);
@@ -152,7 +95,7 @@ export default class TileEngine extends EventEmitting(null) {
     this.init = (map) => {
       this.actionExecutor.registerAction('changeMap', (options) => this.load(options.map, options.override));
       return this.load(map).then(() => {
-        draw()
+        this.renderer.draw()
 
         const player = 'player';
         if (overrides.enableMouseInput) {
@@ -169,7 +112,6 @@ export default class TileEngine extends EventEmitting(null) {
     }
 
     this.extensions = [];
-    this.draw = draw;
 
     this.clearText = () => {
       this.createEvent('clearText', arguments);
@@ -213,6 +155,11 @@ export default class TileEngine extends EventEmitting(null) {
     });
   }
 
+  initializeRendering () {
+    this.renderer = new RenderingPipeline(this);
+    this.renderer.on('afterDraw', () => this.drawMessages());
+  }
+
   get actions () {
     return this.currentMap.actions || [];
   }
@@ -249,7 +196,7 @@ export default class TileEngine extends EventEmitting(null) {
     if (this.paused) {
       this.createEvent('unpause');
       this.paused = false;
-      this.draw();
+      this.renderer.draw();
     }
   }
 }

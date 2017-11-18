@@ -24,6 +24,15 @@ If you would like to contribute, please send a pull-request.
 I would appreciate a short message if you do something cool with this engine in your own project.
 Please keep in mind that JSIso (i.e. everything in the `src/jsiso` directory) is licensed under the Apache License Version 2.0.
 
+## Tests
+Run `npm test` for tests and coverage.
+Use `npm run report` for a html report on coverage.
+
+During development, it is useful to use `ava -w` directly, as it will watch the code and execute all relevant tests automatically.
+You might want to install [AVA](https://ava.li) globally for this.
+
+PRs will automatically be checked for test failures and coverage drops.
+
 ## Resources
 Some images in the examples are provided with permission of the original artists.
 Please have a look at the included license files and check out their other work!

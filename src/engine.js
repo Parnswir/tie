@@ -101,15 +101,6 @@ export default class TileEngine extends EventEmitting() {
     return this.currentMap.actions || [];
   }
 
-  getCharacter (id) {
-    return this.playerMap[id];
-  }
-
-  addPlayer (player, characterId) {
-    this.players.push(player);
-    this.playerMap[characterId] = player;
-  }
-
   interact (player, tile) {
     this.createEvent('interact', arguments);
     if (this.paused) {
@@ -170,25 +161,39 @@ export default class TileEngine extends EventEmitting() {
               height: playerOptions.height
             }
           }]).then((playerImages) => {
-            playerOptions.files = playerImages[0].files;
-            playerOptions.layer = this.mapLayers[0];
-            playerOptions.pathfindingLayer = this.mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(currentMap);
-            playerOptions.tileWidth = this.currentMap.tileWidth;
-            playerOptions.tileHeight = this.currentMap.tileHeight;
-
-            let player = new Player(this.context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
-            player.on("changeTile", (p, tile) => {
-              this.actions.filter((action) => action.type === this.actionExecutor.TYPE_POSITIONAL).forEach((action) => {
-                if (action.x === tile.x && action.y === tile.y) {
-                  this.actionExecutor.execute(action, this, p);
-                }
-              })
-            });
-            this.addPlayer(player, characterId);
+            playerOptions = this.refinePlayerOptions(playerOptions, playerImages);
+            this.addPlayer(playerOptions, characterId);
           }));
         }
       }
       return Promise.all(promises);
     });
+  }
+
+  refinePlayerOptions (playerOptions, images) {
+    return Object.assign(playerOptions, {
+      files: images[0].files,
+      layer: this.mapLayers[0],
+      pathfindingLayer: this.mapLayers[playerOptions.pathfindingLayer] || this.layerSystem.createEmptyLayer(currentMap),
+      tileWidth: this.currentMap.tileWidth,
+      tileHeight: this.currentMap.tileHeight
+    });
+  }
+
+  getCharacter (id) {
+    return this.playerMap[id];
+  }
+
+  addPlayer (playerOptions, characterId) {
+    let player = new Player(this.context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
+    player.on("changeTile", (p, tile) => {
+      this.actions.filter((action) => action.type === this.actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+        if (action.x === tile.x && action.y === tile.y) {
+          this.actionExecutor.execute(action, this, p);
+        }
+      })
+    });
+    this.players.push(player);
+    this.playerMap[characterId] = player;
   }
 }

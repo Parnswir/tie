@@ -19,14 +19,13 @@ import {appendHtml, computeOnce, merge} from './util';
 
 const CONTAINER_NAME = 'container';
 
-export default class TileEngine extends EventEmitting(null) {
+export default class TileEngine extends EventEmitting() {
 
   constructor(x, y, xrange, yrange, overrides) {
     super();
 
     this.overrides = Object.assign({}, overrides);
     this.prepareContainer();
-
 
     this.reset();
     this.initializeActionExecutor();

@@ -5,7 +5,7 @@ let once = function (self, event, id, handler) {
   }
 }
 
-let EventEmitting = (superclass) => class extends superclass {
+let EventEmitting = (superclass=null) => class extends superclass {
 
   constructor() {
     super(...arguments);

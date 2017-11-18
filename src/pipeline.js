@@ -11,7 +11,7 @@ const requestAnimFrame = (function() {
   };
 })();
 
-export default class RenderPipeline extends EventEmitting(null) {
+export default class RenderPipeline extends EventEmitting() {
 
   constructor (engine, {x, y, xrange, yrange}) {
     super();

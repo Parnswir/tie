@@ -23,3 +23,8 @@ If you would like to contribute, please send a pull-request.
 
 I would appreciate a short message if you do something cool with this engine in your own project.
 Please keep in mind that JSIso (i.e. everything in the `src/jsiso` directory) is licensed under the Apache License Version 2.0.
+
+## Resources
+Some images in the examples are provided with permission of the original artists.
+Please have a look at the included license files and check out their other work!
+Keep these licenses in mind if you plan to re-use parts of the examples.

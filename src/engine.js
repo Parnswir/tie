@@ -40,45 +40,8 @@ export default class TileEngine extends EventEmitting(null) {
     this.context = CanvasControl.create("canvas", this.controlWidth, this.controlHeight, {}, CONTAINER_NAME, true);
     this.input = new CanvasInput(document, CanvasControl());
 
-    this.currentMap = void 0;
-    this.mapLayers = [];
-
-    let paused = false;
-    let players = [];
-    let playerMap = {};
-
+    this.reset();
     this.initializeActionExecutor();
-
-    let getActions = () => this.currentMap.actions || [];
-
-    let interact = (player, tile) => {
-      this.createEvent('interact', arguments);
-      if (paused) {
-        this.drawMessages();
-      } else {
-        if (!player.isMoving()) {
-          getActions()
-            .filter((action) => action.type !== this.actionExecutor.TYPE_POSITIONAL)
-            .filter((action) => action.x === tile.x && action.y == tile.y)
-            .forEach((action) => this.actionExecutor.execute(action, this, player));
-        }
-      }
-    };
-
-    let pause = () => {
-      this.createEvent('pause');
-      paused = true;
-    }
-
-    let unpause = () => {
-      if (paused) {
-        this.createEvent('unpause');
-        paused = false;
-        draw();
-      }
-    }
-
-    let getCharacter = (id) => playerMap[id];
 
     let setPlayerLighting = (tile) => {
       this.mapLayers.forEach((layer) => layer.setLight(tile.x, tile.y));
@@ -111,7 +74,7 @@ export default class TileEngine extends EventEmitting(null) {
         this.context.clearRect(0, 0, this.controlWidth, this.controlHeight);
         let comparator = (a, b) => a.zIndex > b.zIndex;
         let thingsToDraw = this.mapLayers.sort(comparator);
-        let playersToDraw = players.slice().sort(comparator);
+        let playersToDraw = this.players.slice().sort(comparator);
         for (let thing of thingsToDraw) {
           while (playersToDraw.length > 0 && playersToDraw[0].zIndex < thing.zIndex) {
             drawPlayer(playersToDraw.shift());
@@ -122,7 +85,7 @@ export default class TileEngine extends EventEmitting(null) {
         }
         playersToDraw.forEach(drawPlayer);
         this.drawMessages();
-        if (!paused) {
+        if (!this.paused) {
           requestAnimationFrame(draw);
         }
       }
@@ -146,13 +109,6 @@ export default class TileEngine extends EventEmitting(null) {
       }
       return initLayer(layer);
     });
-
-    this.reset = () => {
-      paused = false;
-      this.mapLayers = [];
-      players = [];
-      playerMap = {};
-    }
 
     this.load = (mapPath, options={}) => {
       return MapLoader.load(mapPath).then((map) => {
@@ -179,14 +135,13 @@ export default class TileEngine extends EventEmitting(null) {
 
               let player = new Player(this.context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
               player.on("changeTile", (p, tile) => {
-                getActions().filter((action) => action.type === this.actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+                this.actions.filter((action) => action.type === this.actionExecutor.TYPE_POSITIONAL).forEach((action) => {
                   if (action.x === tile.x && action.y === tile.y) {
                     this.actionExecutor.execute(action, this, p);
                   }
                 })
               });
-              players.push(player);
-              playerMap[characterId] = player;
+              this.addPlayer(player, characterId);
             }));
           }
         }
@@ -213,13 +168,8 @@ export default class TileEngine extends EventEmitting(null) {
       .catch(console.error);
     }
 
-    this.pause = pause;
-    this.unpause = unpause;
-    this.paused = paused;
-    this.getCharacter = getCharacter;
-    this.interact = interact;
-
     this.extensions = [];
+    this.draw = draw;
 
     this.clearText = () => {
       this.createEvent('clearText', arguments);
@@ -244,6 +194,13 @@ export default class TileEngine extends EventEmitting(null) {
     this.controlHeight = this.container.clientHeight;
   }
 
+  reset () {
+    this.paused = false;
+    this.mapLayers = [];
+    this.players = [];
+    this.playerMap = {};
+  }
+
   initializeActionExecutor () {
     this.actionExecutor = new ActionExecutor();
     this.actionExecutor.registerAction('toggleTile', (options, engine, player) => {
@@ -254,5 +211,45 @@ export default class TileEngine extends EventEmitting(null) {
         layer.setTile(options.target.x, options.target.y, options.tiles[(currentIndex + 1) % options.tiles.length]);
       })
     });
+  }
+
+  get actions () {
+    return this.currentMap.actions || [];
+  }
+
+  getCharacter (id) {
+    return this.playerMap[id];
+  }
+
+  addPlayer (player, characterId) {
+    this.players.push(player);
+    this.playerMap[characterId] = player;
+  }
+
+  interact (player, tile) {
+    this.createEvent('interact', arguments);
+    if (this.paused) {
+      this.drawMessages();
+    } else {
+      if (!player.isMoving()) {
+        this.actions
+          .filter((action) => action.type !== this.actionExecutor.TYPE_POSITIONAL)
+          .filter((action) => action.x === tile.x && action.y == tile.y)
+          .forEach((action) => this.actionExecutor.execute(action, this, player));
+      }
+    }
+  }
+
+  pause () {
+    this.createEvent('pause');
+    this.paused = true;
+  }
+
+  unpause () {
+    if (this.paused) {
+      this.createEvent('unpause');
+      this.paused = false;
+      this.draw();
+    }
   }
 }

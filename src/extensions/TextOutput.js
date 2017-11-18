@@ -15,49 +15,59 @@ let createElements = (container, names) => {
   appendHtml(container, elements);
 }
 
-export default function TextOutput(parent, engine, overrides) {
-  let textMessages = [];
+export default class TextOutput {
 
-  let elementNames = Object.assign(ELEMENT_NAMES, overrides.customElementNames);
-  if (! overrides.useCustomElements) {
-    createElements(parent, elementNames);
+  constructor(parent, engine) {
+    let elementNames = Object.assign(ELEMENT_NAMES, engine.overrides.customElementNames);
+    if (!engine.overrides.useCustomElements) {
+      createElements(parent, elementNames);
+    }
+
+    this._textMessages = [];
+    this.engine = engine;
+
+    this.textMessageFrame = document.getElementById(elementNames.frameName);
+    this.textMessage = document.getElementById(elementNames.messageName);
+    this.textIndicator = document.getElementById(elementNames.indicatorName)
+
+    this.textMessageFrame.onclick = () => engine.drawMessages();
+
+    engine.clearText = combine(engine.clearText, this.clearText.bind(this));
+    engine.displayText = combine(engine.displayText, this.displayText.bind(this));
+    engine.drawMessages = combine(engine.drawMessages, this.drawMessages.bind(this));
+
+    engine.actionExecutor.registerAction("text", (options, engine, player) => {
+      engine.displayText(options.text.split("\n"))
+    }, true);
   }
 
-  const textMessageFrame = document.getElementById(elementNames.frameName);
-  const textMessage = document.getElementById(elementNames.messageName);
-  const textIndicator = document.getElementById(elementNames.indicatorName)
+  clearText () {
+    this._textMessages = [];
+    this.textMessageFrame.classList.remove("in");
+    this.textMessage.innerHTML = "";
+    this.textIndicator.classList.remove("in");
+    this.engine.unpause();
+  }
 
-  textMessageFrame.onclick = () => engine.drawMessages();
+  displayText (text) {
+    this._textMessages = this._textMessages.concat(text);
+  }
 
-  engine.clearText = combine(engine.clearText, () => {
-    textMessages = [];
-    textMessageFrame.classList.remove("in");
-    textMessage.innerHTML = "";
-    textIndicator.classList.remove("in");
-    engine.unpause();
-  });
-
-  engine.displayText = combine(engine.displayText, (text) => {
-    textMessages = textMessages.concat(text);
-  });
-
-  engine.drawMessages = combine(engine.drawMessages, () => {
-    if (textMessages.length > 0) {
-      engine.pause();
-      let text = textMessages.splice(0, 1)[0];
-      textMessage.innerHTML = text;
-      if (!("in" in textMessageFrame.classList)) {
-        textMessageFrame.classList.add("in");
+  drawMessages () {
+    if (this._textMessages.length > 0) {
+      this.engine.pause();
+      const text = this._textMessages.splice(0, 1)[0];
+      this.textMessage.innerHTML = text;
+      if (!("in" in this.textMessageFrame.classList)) {
+        this.textMessageFrame.classList.add("in");
       }
-      if (textMessages.length >= 1) {
-        textIndicator.classList.add("in");
+      if (this._textMessages.length >= 1) {
+        this.textIndicator.classList.add("in");
       } else {
-        textIndicator.classList.remove("in");
+        this.textIndicator.classList.remove("in");
       }
     } else {
-      engine.clearText();
+      this.clearText();
     }
-  });
-
-  engine.actionExecutor.registerAction("text", (options, engine, player) => engine.displayText(options.text.split("\n")), true);
+  }
 }

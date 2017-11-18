@@ -2,7 +2,6 @@ import CanvasControl from './jsiso/canvas/Control';
 import CanvasInput from './jsiso/canvas/Input';
 import imgLoader from './jsiso/img/load';
 import jsonLoader from './jsiso/json/load';
-import TileField from './jsiso/tile/Field';
 import pathfind from './jsiso/pathfind/pathfind';
 
 import MapLoader from './map';
@@ -10,6 +9,7 @@ import Player from './player';
 import ActionExecutor from './action';
 import EventEmitting from './EventEmitter';
 import RenderingPipeline from './pipeline';
+import LayerSystem from './LayerSystem';
 
 import TextOutput from './extensions/TextOutput';
 import KeyboardInput from './extensions/KeyboardInput';
@@ -27,102 +27,11 @@ export default class TileEngine extends EventEmitting() {
     this.overrides = Object.assign({}, overrides);
     this.prepareContainer();
 
-    this.reset();
     this.initializeActionExecutor();
     this.initializeRendering({x, y, xrange, yrange});
-    this.input = new CanvasInput(document, CanvasControl());
+    this.initializeLayerSystem();
 
-    let initLayer = (layer) => {
-      let mapLayer = new TileField(this.context, this.controlWidth, this.controlHeight);
-      mapLayer.setup(layer);
-      mapLayer.flip("horizontal");
-      mapLayer.rotate("left");
-      mapLayer.setLightmap(layer.lightmap);
-      mapLayer = Object.assign(mapLayer, layer);
-      return mapLayer;
-    }
-
-    let createEmptyLayer = computeOnce((map) => {
-      let layer = {
-        width: map.width,
-        height: map.height,
-        layout: Array(map.width * map.height).fill(0)
-      }
-      return initLayer(layer);
-    });
-
-    this.load = (mapPath, options={}) => {
-      return MapLoader.load(mapPath).then((map) => {
-        this.reset();
-        this.currentMap = merge(map, options);
-        this.mapLayers = this.currentMap.layers.map(initLayer);
-        this.renderer.layers = this.mapLayers;
-        let promises = [];
-        let characters = this.currentMap.characters || {};
-        for (let characterId of Object.keys(characters)) {
-          let playerOptions = characters[characterId];
-          if (playerOptions) {
-            promises.push(imgLoader([{
-              graphics: [playerOptions.sprites],
-              spritesheet: {
-                width: playerOptions.width,
-                height: playerOptions.height
-              }
-            }]).then((playerImages) => {
-              playerOptions.files = playerImages[0].files;
-              playerOptions.layer = this.mapLayers[0];
-              playerOptions.pathfindingLayer = this.mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(currentMap);
-              playerOptions.tileWidth = this.currentMap.tileWidth;
-              playerOptions.tileHeight = this.currentMap.tileHeight;
-
-              let player = new Player(this.context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
-              player.on("changeTile", (p, tile) => {
-                this.actions.filter((action) => action.type === this.actionExecutor.TYPE_POSITIONAL).forEach((action) => {
-                  if (action.x === tile.x && action.y === tile.y) {
-                    this.actionExecutor.execute(action, this, p);
-                  }
-                })
-              });
-              this.addPlayer(player, characterId);
-            }));
-          }
-        }
-        return Promise.all(promises);
-      });
-    }
-
-    this.init = (map) => {
-      this.actionExecutor.registerAction('changeMap', (options) => this.load(options.map, options.override));
-      return this.load(map).then(() => {
-        this.renderer.start()
-
-        const player = 'player';
-        if (overrides.enableMouseInput) {
-          this.extensions.push(new MouseInput(this.input, this, player));
-        }
-        if (overrides.enableKeyboardInput) {
-          this.extensions.push(new KeyboardInput(this.input, this, player));
-        }
-        if (overrides.enableTextOutput) {
-          this.extensions.push(new TextOutput(this.parent, this, overrides));
-        }
-      })
-      .catch(console.error);
-    }
-
-    this.extensions = [];
-
-    this.clearText = () => {
-      this.createEvent('clearText', arguments);
-    }
-
-    this.displayText = () => {
-      this.createEvent('displayText', arguments);
-    }
-
-    this.drawMessages = () => {
-      this.createEvent('drawMessages', arguments);
-    }
+    this.reset();
   }
 
   prepareContainer () {
@@ -137,9 +46,9 @@ export default class TileEngine extends EventEmitting() {
 
   reset () {
     this.paused = false;
-    this.mapLayers = [];
     this.players = [];
     this.playerMap = {};
+    this.layerSystem.layers = [];
   }
 
   initializeActionExecutor () {
@@ -154,11 +63,38 @@ export default class TileEngine extends EventEmitting() {
     });
   }
 
+  initializeLayerSystem () {
+    this.layerSystem = new LayerSystem(this.context);
+  }
+
   initializeRendering (args) {
     this.context = CanvasControl.create("canvas", this.controlWidth, this.controlHeight, {}, CONTAINER_NAME, true);
     this.renderer = new RenderingPipeline(this, args);
     this.renderer.context = this.context;
     this.renderer.on('afterDraw', () => this.drawMessages());
+  }
+
+  initializeExtensions () {
+    this.extensions = [];
+    const player = 'player';
+    let input = new CanvasInput(document, CanvasControl());
+    if (this.overrides.enableMouseInput) {
+      this.extensions.push(new MouseInput(input, this, player));
+    }
+    if (this.overrides.enableKeyboardInput) {
+      this.extensions.push(new KeyboardInput(input, this, player));
+    }
+    if (this.overrides.enableTextOutput) {
+      this.extensions.push(new TextOutput(this.parent, this));
+    }
+  }
+
+  init (map) {
+    this.actionExecutor.registerAction('changeMap', (options) => this.load(options.map, options.override));
+    return this.load(map).then(() => {
+      this.renderer.start();
+      this.initializeExtensions();
+    });
   }
 
   get actions () {
@@ -200,5 +136,59 @@ export default class TileEngine extends EventEmitting() {
       this.paused = false;
       this.renderer.start();
     }
+  }
+
+  clearText () {
+    this.createEvent('clearText', arguments);
+  }
+
+  displayText () {
+    this.createEvent('displayText', arguments);
+  }
+
+  drawMessages () {
+    this.createEvent('drawMessages', arguments);
+  }
+
+  get mapLayers () {return this.layerSystem.layers}
+
+  load (mapPath, options={}) {
+    return MapLoader.load(mapPath).then((map) => {
+      this.reset();
+      this.currentMap = merge(map, options);
+      this.layerSystem.init(this.currentMap);
+      this.renderer.layers = this.mapLayers;
+      let promises = [];
+      let characters = this.currentMap.characters || {};
+      for (let characterId of Object.keys(characters)) {
+        let playerOptions = characters[characterId];
+        if (playerOptions) {
+          promises.push(imgLoader([{
+            graphics: [playerOptions.sprites],
+            spritesheet: {
+              width: playerOptions.width,
+              height: playerOptions.height
+            }
+          }]).then((playerImages) => {
+            playerOptions.files = playerImages[0].files;
+            playerOptions.layer = this.mapLayers[0];
+            playerOptions.pathfindingLayer = this.mapLayers[playerOptions.pathfindingLayer] || createEmptyLayer(currentMap);
+            playerOptions.tileWidth = this.currentMap.tileWidth;
+            playerOptions.tileHeight = this.currentMap.tileHeight;
+
+            let player = new Player(this.context, playerOptions, playerOptions.x, playerOptions.y, pathfind);
+            player.on("changeTile", (p, tile) => {
+              this.actions.filter((action) => action.type === this.actionExecutor.TYPE_POSITIONAL).forEach((action) => {
+                if (action.x === tile.x && action.y === tile.y) {
+                  this.actionExecutor.execute(action, this, p);
+                }
+              })
+            });
+            this.addPlayer(player, characterId);
+          }));
+        }
+      }
+      return Promise.all(promises);
+    });
   }
 }

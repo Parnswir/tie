@@ -16,7 +16,7 @@ import MouseInput from './extensions/MouseInput';
 
 import {appendHtml, computeOnce, merge} from './util';
 
-let requestAnimFrame = (function() {
+const requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
   window.webkitRequestAnimationFrame  ||
   window.mozRequestAnimationFrame     ||
@@ -29,23 +29,15 @@ let requestAnimFrame = (function() {
 
 const CONTAINER_NAME = 'container';
 
-export default class TileEngine extends EventEmitting(Object) {
+export default class TileEngine extends EventEmitting(null) {
 
   constructor(x, y, xrange, yrange, overrides) {
     super();
 
-    let self = this;
-    overrides = Object.assign({}, overrides);
+    this.overrides = Object.assign({}, overrides);
+    this.prepareContainer();
 
-    let parent = overrides.parent || document.body;
-    if (!overrides.useCustomElements) {
-      appendHtml(parent, '<div id="' + CONTAINER_NAME + '"></div>');
-    }
-    const container = document.getElementById(CONTAINER_NAME);
-
-    const controlWidth = container.clientWidth;
-    const controlHeight = container.clientHeight;
-    const context = CanvasControl.create("canvas", controlWidth, controlHeight, {}, CONTAINER_NAME, true);
+    const context = CanvasControl.create("canvas", this.controlWidth, this.controlHeight, {}, CONTAINER_NAME, true);
     const input = new CanvasInput(document, CanvasControl());
 
     let currentMap;
@@ -76,7 +68,7 @@ export default class TileEngine extends EventEmitting(Object) {
           getActions()
             .filter((action) => action.type !== actionExecutor.TYPE_POSITIONAL)
             .filter((action) => action.x === tile.x && action.y == tile.y)
-            .forEach((action) => actionExecutor.execute(action, self, player));
+            .forEach((action) => actionExecutor.execute(action, this, player));
         }
       }
     };
@@ -124,7 +116,7 @@ export default class TileEngine extends EventEmitting(Object) {
         requestAnimationFrame(draw);
       } else {
         previousTime = time;
-        context.clearRect(0, 0, controlWidth, controlHeight);
+        context.clearRect(0, 0, this.controlWidth, this.controlHeight);
         let comparator = (a, b) => a.zIndex > b.zIndex;
         let thingsToDraw = mapLayers.sort(comparator);
         let playersToDraw = players.slice().sort(comparator);
@@ -145,7 +137,7 @@ export default class TileEngine extends EventEmitting(Object) {
     }
 
     let initLayer = (layer) => {
-      let mapLayer = new TileField(context, controlWidth, controlHeight);
+      let mapLayer = new TileField(context, this.controlWidth, this.controlHeight);
       mapLayer.setup(layer);
       mapLayer.flip("horizontal");
       mapLayer.rotate("left");
@@ -197,7 +189,7 @@ export default class TileEngine extends EventEmitting(Object) {
               player.on("changeTile", (p, tile) => {
                 getActions().filter((action) => action.type === actionExecutor.TYPE_POSITIONAL).forEach((action) => {
                   if (action.x === tile.x && action.y === tile.y) {
-                    actionExecutor.execute(action, self, p);
+                    actionExecutor.execute(action, this, p);
                   }
                 })
               });
@@ -217,13 +209,13 @@ export default class TileEngine extends EventEmitting(Object) {
 
         const player = 'player';
         if (overrides.enableMouseInput) {
-          this.extensions.push(new MouseInput(input, self, player));
+          this.extensions.push(new MouseInput(input, this, player));
         }
         if (overrides.enableKeyboardInput) {
-          this.extensions.push(new KeyboardInput(input, self, player));
+          this.extensions.push(new KeyboardInput(input, this, player));
         }
         if (overrides.enableTextOutput) {
-          this.extensions.push(new TextOutput(parent, self, overrides));
+          this.extensions.push(new TextOutput(this.parent, this, overrides));
         }
       })
       .catch(console.error);
@@ -250,5 +242,15 @@ export default class TileEngine extends EventEmitting(Object) {
     this.drawMessages = () => {
       this.createEvent('drawMessages', arguments);
     }
+  }
+
+  prepareContainer () {
+    this.parent = this.overrides.parent || document.body;
+    if (!this.overrides.useCustomElements) {
+      appendHtml(this.parent, '<div id="' + CONTAINER_NAME + '"></div>');
+    }
+    this.container = document.getElementById(CONTAINER_NAME);
+    this.controlWidth = this.container.clientWidth;
+    this.controlHeight = this.container.clientHeight;
   }
 }

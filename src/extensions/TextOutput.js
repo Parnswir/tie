@@ -17,9 +17,9 @@ let createElements = (container, names) => {
 
 export default class TextOutput {
 
-  constructor(parent, engine, overrides) {
-    let elementNames = Object.assign(ELEMENT_NAMES, overrides.customElementNames);
-    if (! overrides.useCustomElements) {
+  constructor(parent, engine) {
+    let elementNames = Object.assign(ELEMENT_NAMES, engine.overrides.customElementNames);
+    if (!engine.overrides.useCustomElements) {
       createElements(parent, elementNames);
     }
 

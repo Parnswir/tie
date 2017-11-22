@@ -3,23 +3,23 @@ import Player from '../src/player'
 
 test('#getDirection works', t => {
   const player = new Player({}, {direction: 0});
-  t.is(player.getDirection(), 0);
+  t.is(player.direction, 0);
 });
 
 test('#setDirection works', t => {
   const player = new Player({}, {direction: 0});
-  player.setDirection(3);
-  t.is(player.getDirection(), 3);
-  player.setDirection(2);
-  t.is(player.getDirection(), 2);
+  player.direction = 3;
+  t.is(player.direction, 3);
+  player.direction = 2;
+  t.is(player.direction, 2);
 });
 
 test('#setDirection sets only valid directions', t => {
   const player = new Player();
-  player.setDirection(6);
-  t.is(player.getDirection(), 2);
-  player.setDirection(-1);
-  t.is(player.getDirection(), 3);
+  player.direction = 6;
+  t.is(player.direction, 2);
+  player.direction = -1;
+  t.is(player.direction, 3);
 });
 
 test('#setDirection emits an event announcing the new direction', t => {
@@ -28,18 +28,18 @@ test('#setDirection emits an event announcing the new direction', t => {
   player.on('setDirection', (instance, direction) => {
     t.is(instance, player);
     t.is(direction, DIRECTION);
-    t.is(direction, instance.getDirection());
+    t.is(direction, instance.direction);
   });
   t.plan(3);
-  player.setDirection(DIRECTION);
+  player.direction = DIRECTION;
 });
 
 test('is not moving by default after creation', t => {
-  t.false(new Player().isMoving());
+  t.false(new Player().isMoving);
 });
 
 test('#getTile works', t => {
-  t.deepEqual(new Player({}, {}, 1, 2).getTile(), {x: 1, y:2});
+  t.deepEqual(new Player({}, {}, 1, 2).tile, {x: 1, y:2});
 });
 
 test('#getLookedAtTile works', t => {

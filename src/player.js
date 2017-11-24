@@ -6,62 +6,10 @@ export default class Player extends EventEmitting() {
     super();
     this.properties = properties;
     this.tile = {x, y};
-    this.path = [];
     this.context = context;
 
     this.movementFrame = 0;
     this.movementFrameTimer = Math.floor(Math.random() * this.properties.movementFrameCount);
-
-    let previousTile = this.tile;
-    let hadPath = false;
-    this.move = function () {
-      let speed = this.properties.speed;
-      if (this.path.length > 0) {
-        hadPath = true;
-        movementFrameTimer += 1;
-
-        let tileWidth = this.properties.tileWidth;
-        let tileHeight = this.properties.tileHeight;
-        let frameWidth = this.texture.width;
-        let frameHeight = this.texture.height;
-
-        let targetX = this.path[0].x * tileWidth + frameWidth / 2;
-        let targetY = this.path[0].y * tileHeight + frameHeight / 2;
-
-        let inPosX = (targetX === this.pos.x);
-        let inPosY = (targetY === this.pos.y);
-
-        if (inPosX && inPosY) {
-          this.path.shift();
-          this.createEvent("pathComplete", this.path);
-        } else {
-          if (!inPosX) {
-            let modifier = (targetX - this.pos.x) / Math.abs(targetX - this.pos.x);
-            this.setDirection(modifier > 0 ? 3 : 2);
-            this.pos.x += modifier * speed;
-          }
-          if (!inPosY) {
-            let modifier = (targetY - this.pos.y) / Math.abs(targetY - this.pos.y);
-            this.setDirection(modifier > 0 ? 0 : 1);
-            this.pos.y += modifier * speed;
-          }
-        }
-      } else {
-        if (hadPath) {
-          this.createEvent("movementComplete");
-          hadPath = false;
-        }
-      }
-      this.tile = this.properties.layer.getXYCoords(this.pos.x, this.pos.y);
-      if (this.tile.x !== previousTile.x || this.tile.y !== previousTile.y) {
-        this.createEvent("changeTile", this.tile);
-        previousTile = this.tile;
-      }
-    };
-
-    this.id = this.properties.id;
-    this.zIndex = this.properties.zIndex;
-    this.useLighting = this.properties.useLighting;
   }
 
   get properties () {return this._properties}
@@ -94,9 +42,24 @@ export default class Player extends EventEmitting() {
     this.createEvent("setDirection", this.properties.direction);
   }
 
-  get path () {return this._path}
+  get path () {return this._path || []}
   set path (path) {
     this._path = path
+  }
+
+  get id () {return this._properties.id}
+  set id (id) {
+    this._properties.id = id;
+  }
+
+  get zIndex () {return this._properties.zIndex}
+  set zIndex (zIndex) {
+    this._properties.zIndex = zIndex;
+  }
+
+  get useLighting () {return this._properties.useLighting}
+  set useLighting (useLighting) {
+    this._properties.useLighting = useLighting;
   }
 
   get texture () {
@@ -159,6 +122,56 @@ export default class Player extends EventEmitting() {
     if (this._movementFrameCounter >= this.properties.movementFrameCount - 1) {
       this.movementFrame += 1;
       this._movementFrameCounter = 0;
+    }
+  }
+
+  get previousTile () {return this._previousTile || this.tile}
+  set previousTile (tile) {
+    this._previousTile = tile;
+  }
+
+  get hadPath () {return this._hadPath || false}
+  set hadPath (value) {
+    this._hadPath = value;
+  }
+
+  move () {
+    const speed = this.properties.speed;
+    if (this.path.length > 0) {
+      this.hadPath = true;
+      this.movementFrameCounter += 1;
+
+      const targetX = this.path[0].x * this.properties.tileWidth + this.texture.width / 2;
+      const targetY = this.path[0].y * this.properties.tileHeight + this.texture.height / 2;
+
+      const inPosX = (targetX === this.pos.x);
+      const inPosY = (targetY === this.pos.y);
+
+      if (inPosX && inPosY) {
+        this.path.shift();
+        this.createEvent("pathComplete", this.path);
+      } else {
+        if (!inPosX) {
+          const modifier = (targetX - this.pos.x) / Math.abs(targetX - this.pos.x);
+          this.setDirection(modifier > 0 ? 3 : 2);
+          this.pos.x += modifier * speed;
+        }
+        if (!inPosY) {
+          const modifier = (targetY - this.pos.y) / Math.abs(targetY - this.pos.y);
+          this.setDirection(modifier > 0 ? 0 : 1);
+          this.pos.y += modifier * speed;
+        }
+      }
+    } else {
+      if (this.hadPath) {
+        this.createEvent("movementComplete");
+        this.hadPath = false;
+      }
+    }
+    this.tile = this.properties.layer.getXYCoords(this.pos.x, this.pos.y);
+    if (this.tile.x !== this.previousTile.x || this.tile.y !== this.previousTile.y) {
+      this.createEvent("changeTile", this.tile);
+      this.previousTile = this.tile;
     }
   }
 }

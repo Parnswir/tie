@@ -1,4 +1,5 @@
 import EventEmitting from './EventEmitter';
+import Direction from './direction';
 
 export default class Player extends EventEmitting() {
 
@@ -35,7 +36,7 @@ export default class Player extends EventEmitting() {
   }
 
   get direction () {
-    return this.properties.direction || 0;
+    return this.properties.direction || Direction.DOWN;
   }
   set direction (where) {
     this.properties.direction = (where + 4) % 4;
@@ -80,7 +81,7 @@ export default class Player extends EventEmitting() {
   }
 
   directionFrom (x, y) {
-    return 2 * (x != this.tile.x) + (x > this.tile.x) + (y < this.tile.y);
+    return Direction.from(this.tile, {x, y});
   }
 
   moveTo (x, y) {
@@ -95,12 +96,7 @@ export default class Player extends EventEmitting() {
   get isMoving () {return this.path.length > 0};
 
   getLookedAtTile () {
-    switch (this.direction) {
-      case 0: return {x: this.tile.x, y: this.tile.y + 1};
-      case 1: return {x: this.tile.x, y: this.tile.y - 1};
-      case 2: return {x: this.tile.x - 1, y: this.tile.y};
-      case 3: return {x: this.tile.x + 1, y: this.tile.y};
-    }
+    return Direction.tileInDirection(this.tile, this.direction);
   }
 
   draw () {

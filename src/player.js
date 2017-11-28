@@ -7,6 +7,7 @@ export default class Player extends EventEmitting() {
     super();
     this.properties = properties;
     this.tile = {x, y};
+    this.previousTile = this.tile;
     this.pos = {
       x: this.tile.x * this.properties.tileWidth + this.texture.width / 2,
       y: this.tile.y * this.properties.tileHeight + this.texture.height / 2
@@ -93,7 +94,7 @@ export default class Player extends EventEmitting() {
     if (layout[x][y] === 0) {
       this.path = [{x, y}];
     } else {
-      this.setDirection(this.directionFrom(x, y));
+      this.direction = this.directionFrom(x, y);
     }
   }
 
@@ -125,7 +126,7 @@ export default class Player extends EventEmitting() {
     }
   }
 
-  get previousTile () {return this._previousTile || this.tile}
+  get previousTile () {return this._previousTile}
   set previousTile (tile) {
     this._previousTile = tile;
   }

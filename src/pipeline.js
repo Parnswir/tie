@@ -49,7 +49,7 @@ export default class RenderPipeline extends EventEmitting() {
     player.draw(this.context);
     player.move(this.context);
     if (player.useLighting) {
-      this.setPlayerLighting(player.getTile());
+      this.setPlayerLighting(player.tile);
     }
   }
 

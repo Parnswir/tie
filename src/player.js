@@ -136,30 +136,41 @@ export default class Player extends EventEmitting() {
     this._hadPath = value;
   }
 
+  get target () {
+    if (this.path.length > 0) {
+      const x = this.path[0].x * this.properties.tileWidth + this.texture.width / 2;
+      const y = this.path[0].y * this.properties.tileHeight + this.texture.height / 2;
+      return {x, y};
+    } else {
+      return this.tile;
+    }
+  }
+
+  get inPosition () {
+    return {
+      x: this.target.x === this.pos.x,
+      y: this.target.y === this.pos.y
+    };
+  }
+
   move () {
     const speed = this.properties.speed;
     if (this.path.length > 0) {
       this.hadPath = true;
       this.movementFrameCounter += 1;
 
-      const targetX = this.path[0].x * this.properties.tileWidth + this.texture.width / 2;
-      const targetY = this.path[0].y * this.properties.tileHeight + this.texture.height / 2;
-
-      const inPosX = (targetX === this.pos.x);
-      const inPosY = (targetY === this.pos.y);
-
-      if (inPosX && inPosY) {
+      if (this.inPosition.x && this.inPosition.y) {
         this.path.shift();
         this.createEvent("pathComplete", this.path);
       } else {
-        if (!inPosX) {
-          const modifier = (targetX - this.pos.x) / Math.abs(targetX - this.pos.x);
-          this.direction = modifier > 0 ? 3 : 2;
+        if (!this.inPosition.x) {
+          const modifier = (this.target.x - this.pos.x) / Math.abs(this.target.x - this.pos.x);
+          this.direction = modifier > 0 ? Direction.RIGHT : Direction.LEFT;
           this.pos.x += modifier * speed;
         }
-        if (!inPosY) {
-          const modifier = (targetY - this.pos.y) / Math.abs(targetY - this.pos.y);
-          this.direction = modifier > 0 ? 0 : 1;
+        if (!this.inPosition.y) {
+          const modifier = (this.target.y - this.pos.y) / Math.abs(this.target.y - this.pos.y);
+          this.direction = modifier > 0 ? Direction.DOWN : Direction.UP;
           this.pos.y += modifier * speed;
         }
       }

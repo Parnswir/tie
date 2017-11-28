@@ -106,7 +106,7 @@ export default class TileEngine extends EventEmitting() {
     if (this.paused) {
       this.drawMessages();
     } else {
-      if (!player.isMoving()) {
+      if (!player.moving) {
         this.actions
           .filter((action) => action.type !== this.actionExecutor.TYPE_POSITIONAL)
           .filter((action) => action.x === tile.x && action.y == tile.y)

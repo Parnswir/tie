@@ -174,7 +174,7 @@ export default class TileEngine extends EventEmitting() {
     return Object.assign(playerOptions, {
       files: images[0].files,
       layer: this.mapLayers[0],
-      pathfindingLayer: this.mapLayers[playerOptions.pathfindingLayer] || this.layerSystem.createEmptyLayer(currentMap),
+      pathfindingLayer: this.mapLayers[playerOptions.pathfindingLayer] || this.layerSystem.createEmptyLayer(this.currentMap),
       tileWidth: this.currentMap.tileWidth,
       tileHeight: this.currentMap.tileHeight
     });

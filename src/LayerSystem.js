@@ -1,12 +1,21 @@
 import TileField from './jsiso/tile/Field';
 
 import EventEmitting from './EventEmitter';
+import {computeOnce} from './util';
 
 export default class LayerSystem extends EventEmitting() {
 
   constructor (context) {
     super();
     this.context = context;
+    this.createEmptyLayer = computeOnce((map) => {
+      let layer = {
+        width: map.width,
+        height: map.height,
+        layout: Array(map.width * map.height).fill(0)
+      }
+      return this.initLayer(layer);
+    });
   }
 
   get layers () {return this._layers || []}
@@ -24,16 +33,5 @@ export default class LayerSystem extends EventEmitting() {
     mapLayer.setLightmap(layer.lightmap);
     mapLayer = Object.assign(mapLayer, layer);
     return mapLayer;
-  }
-
-  createEmptyLayer () {
-    return computeOnce((map) => {
-      let layer = {
-        width: map.width,
-        height: map.height,
-        layout: Array(map.width * map.height).fill(0)
-      }
-      return initLayer(layer);
-    });
   }
 }

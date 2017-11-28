@@ -7,10 +7,15 @@ export default class Player extends EventEmitting() {
     super();
     this.properties = properties;
     this.tile = {x, y};
+    this.pos = {
+      x: this.tile.x * this.properties.tileWidth + this.texture.width / 2,
+      y: this.tile.y * this.properties.tileHeight + this.texture.height / 2
+    }
     this.context = context;
+    this.pathfind = pathfind;
 
     this.movementFrame = 0;
-    this.movementFrameTimer = Math.floor(Math.random() * this.properties.movementFrameCount);
+    this.movementFrameCounter = Math.floor(Math.random() * this.properties.movementFrameCount);
   }
 
   get properties () {return this._properties}
@@ -28,11 +33,9 @@ export default class Player extends EventEmitting() {
     this._tile = {x, y}
   }
 
-  get pos () {
-    return {
-      x: this.tile.x * this.properties.tileWidth + this.texture.width / 2,
-      y: this.tile.y * this.properties.tileHeight + this.texture.height / 2
-    }
+  get pos () {return this._position}
+  set pos (pos) {
+    this._position = pos;
   }
 
   get direction () {
@@ -72,10 +75,11 @@ export default class Player extends EventEmitting() {
 
   goTo (x, y) {
     this.createEvent("goTo", {x, y});
+    let self = this;
     this.pathfind(this.properties.id, [this.tile.x, this.tile.y], [x, y], this.properties.pathfindingLayer.getLayout(), false, false)
       .then(function (data) {
         if (data.length > 0 && data[1] !== undefined) {
-          this.path = data;
+          self.path = data;
         }
       });
   }
@@ -149,12 +153,12 @@ export default class Player extends EventEmitting() {
       } else {
         if (!inPosX) {
           const modifier = (targetX - this.pos.x) / Math.abs(targetX - this.pos.x);
-          this.setDirection(modifier > 0 ? 3 : 2);
+          this.direction = modifier > 0 ? 3 : 2;
           this.pos.x += modifier * speed;
         }
         if (!inPosY) {
           const modifier = (targetY - this.pos.y) / Math.abs(targetY - this.pos.y);
-          this.setDirection(modifier > 0 ? 0 : 1);
+          this.direction = modifier > 0 ? 0 : 1;
           this.pos.y += modifier * speed;
         }
       }

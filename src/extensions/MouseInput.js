@@ -7,7 +7,7 @@ export default class MouseInput {
       let layer = player.properties.layer;
       let t = layer.applyMouseFocus(coords.x, coords.y);
       player.goTo(t.x, t.y);
-      if (distance(t, player.getTile()) === 1 || engine.paused) {
+      if (distance(t, player.tile) === 1 || engine.paused) {
         engine.interact(player, t);
       }
     });

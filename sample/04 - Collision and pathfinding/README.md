@@ -127,7 +127,7 @@ Here is where another important concept comes into play: Events. Most objects in
   // index.js
   document.getElementById('resetButton').addEventListener('click', (e) => {
     let player = tileEngine.getCharacter('player');
-    player.on('movementComplete', () => player.setDirection(0));
+    player.on('movementComplete', () => player.direction = 0);
     player.goTo(0, 0);
   });
 ```
@@ -139,7 +139,7 @@ Cool. The character turns around once (0, 0) is reached. Unfortunately, it does 
   document.getElementById('resetButton').addEventListener('click', (e) => {
     let player = tileEngine.getCharacter('player');
     player.on('movementComplete', () => {
-      player.setDirection(0);
+      player.direction = 0;
       player.off('movementComplete');
     });
     player.goTo(0, 0);
@@ -153,7 +153,7 @@ If you give `off()` an ID of a handler, it will only remove this handler and lea
   document.getElementById('resetButton').addEventListener('click', (e) => {
     let player = tileEngine.getCharacter('player');
     let id = player.on('movementComplete', () => {
-      player.setDirection(0);
+      player.direction = 0;
       player.off('movementComplete', id);
     });
     player.goTo(0, 0);
@@ -166,7 +166,7 @@ To make this a bit easier, you can also register an event handler that is only v
   // index.js
   document.getElementById('resetButton').addEventListener('click', (e) => {
     let player = tileEngine.getCharacter('player');
-    player.on('once:movementComplete', () => player.setDirection(0));
+    player.on('once:movementComplete', () => player.direction = 0);
     player.goTo(0, 0);
   });
 ```
@@ -175,7 +175,7 @@ To make this a bit easier, you can also register an event handler that is only v
 
 ### Try creating a character that follows the player
 
-You can use the events from this example, as well as the methods `player.getTile()` and `player.getDirection()`.
+You can use the events from this example, as well as the attributes `player.tile` and `player.direction`.
 
 Assuming we have created a button with `id="followButton"` and a character called "example-npc", we can use
 
@@ -184,10 +184,10 @@ Assuming we have created a button with `id="followButton"` and a character calle
   // [...]
   // add this:
   document.getElementById('followButton').addEventListener('click', (e) => {
-    let player = tileEngine.getCharacter('player');
-    let npc = tileEngine.getCharacter('example-npc');
-    npc.goTo(player.getTile().x, player.getTile().y);
-    npc.on('once:movementComplete', () => npc.setDirection(player.getDirection()));
+    const player = tileEngine.getCharacter('player');
+    const npc = tileEngine.getCharacter('example-npc');
+    npc.goTo(player.tile.x, player.tile.y);
+    npc.on('once:movementComplete', () => npc.direction = player.direction);
   });
 ```
 
@@ -197,15 +197,15 @@ Or consider this more complex variation, in which the NPC follows the player aft
   // index.js
   // [...]
   tileEngine.init('./map.json').then(() => {
-    let player = tileEngine.getCharacter('player');
-    let npc = tileEngine.getCharacter('example-npc');
+    const player = tileEngine.getCharacter('player');
+    const npc = tileEngine.getCharacter('example-npc');
 
-    player.on('movementComplete', () => npc.goTo(player.getTile().x, player.getTile().y));
-    npc.on('once:movementComplete', () => npc.setDirection(player.getDirection()));
+    player.on('movementComplete', () => npc.goTo(player.tile.x, player.tile.y));
+    npc.on('once:movementComplete', () => npc.direction = player.direction);
 
     document.getElementById('resetButton').addEventListener('click', (e) => {
       player.goTo(0, 0);
-      player.on('once:movementComplete', () => player.setDirection(0));
+      player.on('once:movementComplete', () => player.direction = 0);
     });
   });
 ```

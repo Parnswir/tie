@@ -36,9 +36,9 @@ export default class TextOutput {
     engine.displayText = combine(engine.displayText, this.displayText.bind(this));
     engine.drawMessages = combine(engine.drawMessages, this.drawMessages.bind(this));
 
-    engine.actionExecutor.registerAction("text", (options, engine, player) => {
-      engine.displayText(options.text.split("\n"))
-    }, true);
+    engine.actionExecutor.registerAction("text", (options, engine, player, callback) => {
+      engine.displayText(options.text.split("\n"));
+    }, false, true);
   }
 
   clearText () {

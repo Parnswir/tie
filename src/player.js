@@ -142,8 +142,11 @@ export default class Player extends EventEmitting() {
       const y = this.path[0].y * this.properties.tileHeight + this.texture.height / 2;
       return {x, y};
     } else {
-      return this.tile;
+      return this.pos;
     }
+  }
+  set target (target) {
+    this.path = [target];
   }
 
   get inPosition () {

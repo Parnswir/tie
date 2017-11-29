@@ -80,3 +80,59 @@ test('#draw calls drawImage method of context', t => {
   const player = new Player(context, options);
   player.draw();
 });
+
+test('#target returns the current position if no path is set', t => {
+  const player = new Player();
+  t.deepEqual(player.target, player.pos);
+});
+
+test('#target returns the coordinates of the next path entry', t => {
+  const TILEWIDTH = 32;
+  const player = new Player({}, {
+    tileWidth: TILEWIDTH,
+    tileHeight: TILEWIDTH
+  });
+  const ITEM = {x: 4, y: 5};
+  player.path = [ITEM];
+  t.deepEqual(player.target, {
+    x: ITEM.x * TILEWIDTH + TILEWIDTH / 2,
+    y: ITEM.y * TILEWIDTH + TILEWIDTH / 2
+  });
+});
+
+test('#setTarget replaces the current path with single element', t => {
+  const FIRST = {x: 1, y: 2};
+  const SECOND = {x: 5, y: 7};
+  const THIRD = {x: 8, y: 1};
+  const player = new Player();
+  player.path = [FIRST, SECOND];
+  t.deepEqual(player.path[0], FIRST);
+  player.target = THIRD;
+  t.is(player.path.length, 1);
+  t.deepEqual(player.path[0], THIRD);
+});
+
+test('#inPosition returns true for both axis when not in motion', t => {
+  const player = new Player();
+  t.truthy(player.inPosition.x);
+  t.truthy(player.inPosition.y);
+});
+
+test('#inPosition works for set targets', t => {
+  const player = new Player({}, {}, 4, 5);
+  player.target = {x: 3, y: 5};
+  t.falsy(player.inPosition.x);
+  t.truthy(player.inPosition.y);
+
+  player.target = {x: 3, y: 7};
+  t.falsy(player.inPosition.x);
+  t.falsy(player.inPosition.y);
+
+  player.target = {x: 4, y: 9};
+  t.truthy(player.inPosition.x);
+  t.falsy(player.inPosition.y);
+
+  player.target = {x: 4, y: 5};
+  t.truthy(player.inPosition.x);
+  t.truthy(player.inPosition.y);
+});

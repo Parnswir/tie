@@ -1,13 +1,13 @@
 const Animated = (superclass=null) => class extends superclass {
 
-  constructor(animationFrameCount=1, framesPerDirection=1) {
+  constructor(properties = {}) {
     super(...arguments);
 
-    this._framesPerDirection = framesPerDirection;
-    this._animationFrameCount = animationFrameCount;
+    this._framesPerDirection = properties.framesPerDirection || 1;
+    this._animationFrameCount = properties.animationFrameCount || 1;
 
     this.animationFrame = 0;
-    this.animationFrameCounter = Math.floor(Math.random() * animationFrameCount);
+    this.animationFrameCounter = Math.floor(Math.random() * this._animationFrameCount);
   }
 
   get animationFrame () {return this._animationFrame}

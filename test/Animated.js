@@ -3,7 +3,7 @@ import test from 'ava';
 import Animated from '../src/Animated';
 
 class AnimatedObject extends Animated() {};
-const newAnimated = (animationFrameCount, framesPerDirection) => new AnimatedObject(animationFrameCount, framesPerDirection);
+const newAnimated = (animationFrameCount, framesPerDirection) => new AnimatedObject({animationFrameCount, framesPerDirection});
 
 test('by default is not animated', t => {
   const animated = newAnimated();

@@ -2,13 +2,20 @@ import EventEmitting from './EventEmitter';
 import Animated from './Animated';
 import Direction from './direction';
 
+const defaults = (options) => {
+  options.tileWidth = options.tileWidth || 32;
+  options.tileHeight = options.tileHeight || 32;
+  options.speed = options.speed || 1;
+  options.animationFrameCount = options.movementFrameCount || 8;
+  options.framesPerDirection = options.framesPerDirection || 4;
+  return options;
+}
+
 export default class Player extends Animated(EventEmitting()) {
 
   constructor(context, properties={}, x=0, y=0, pathfind) {
-    super(
-      properties.movementFrameCount || 8,
-      properties.framesPerDirection || 4
-    );
+    properties = defaults(properties);
+    super(properties);
     this.properties = properties;
     this.tile = {x, y};
     this.previousTile = this.tile;
@@ -18,14 +25,6 @@ export default class Player extends Animated(EventEmitting()) {
     }
     this.context = context;
     this.pathfind = pathfind;
-  }
-
-  get properties () {return this._properties}
-  set properties (options) {
-    options.tileWidth = options.tileWidth || 32;
-    options.tileHeight = options.tileHeight || 32;
-    options.speed = options.speed || 1;
-    this._properties = options
   }
 
   get tile () {return this._tile}
@@ -51,19 +50,19 @@ export default class Player extends Animated(EventEmitting()) {
     this._path = path
   }
 
-  get id () {return this._properties.id}
+  get id () {return this.properties.id}
   set id (id) {
-    this._properties.id = id;
+    this.properties.id = id;
   }
 
-  get zIndex () {return this._properties.zIndex}
+  get zIndex () {return this.properties.zIndex}
   set zIndex (zIndex) {
-    this._properties.zIndex = zIndex;
+    this.properties.zIndex = zIndex;
   }
 
-  get useLighting () {return this._properties.useLighting}
+  get useLighting () {return this.properties.useLighting}
   set useLighting (useLighting) {
-    this._properties.useLighting = useLighting;
+    this.properties.useLighting = useLighting;
   }
 
   get texture () {

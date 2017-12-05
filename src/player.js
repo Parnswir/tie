@@ -1,10 +1,14 @@
 import EventEmitting from './EventEmitter';
+import Animated from './Animated';
 import Direction from './direction';
 
-export default class Player extends EventEmitting() {
+export default class Player extends Animated(EventEmitting()) {
 
   constructor(context, properties={}, x=0, y=0, pathfind) {
-    super();
+    super(
+      properties.movementFrameCount || 8,
+      properties.framesPerDirection || 4
+    );
     this.properties = properties;
     this.tile = {x, y};
     this.previousTile = this.tile;
@@ -14,17 +18,12 @@ export default class Player extends EventEmitting() {
     }
     this.context = context;
     this.pathfind = pathfind;
-
-    this.movementFrame = 0;
-    this.movementFrameCounter = Math.floor(Math.random() * this.properties.movementFrameCount);
   }
 
   get properties () {return this._properties}
   set properties (options) {
     options.tileWidth = options.tileWidth || 32;
     options.tileHeight = options.tileHeight || 32;
-    options.movementFrameCount = options.movementFrameCount || 8;
-    options.framesPerDirection = options.framesPerDirection || 4;
     options.speed = options.speed || 1;
     this._properties = options
   }
@@ -105,25 +104,10 @@ export default class Player extends EventEmitting() {
   }
 
   draw () {
-    let getFrame = () => this.properties.files[this.properties.framesPerDirection * this.direction + this.movementFrame];
     let getFrameX = (offset) => this.pos.x - this.texture.width / 2 + offset.x;
     let getFrameY = (offset) => this.pos.y - this.texture.height / 2 + offset.y;
     let offset = this.properties.layer.getOffset();
-    this.context.drawImage(getFrame(), getFrameX(offset), getFrameY(offset));
-  }
-
-  get movementFrame () {return this._movementFrame}
-  set movementFrame (frame) {
-    this._movementFrame = frame % this.properties.framesPerDirection;
-  }
-
-  get movementFrameCounter () {return this._movementFrameCounter}
-  set movementFrameCounter (frame) {
-    this._movementFrameCounter = frame;
-    if (this._movementFrameCounter >= this.properties.movementFrameCount - 1) {
-      this.movementFrame += 1;
-      this._movementFrameCounter = 0;
-    }
+    this.context.drawImage(this.getFrame(this.properties.files, this.direction), getFrameX(offset), getFrameY(offset));
   }
 
   get previousTile () {return this._previousTile}
@@ -160,7 +144,7 @@ export default class Player extends EventEmitting() {
     const speed = this.properties.speed;
     if (this.path.length > 0) {
       this.hadPath = true;
-      this.movementFrameCounter += 1;
+      this.stepAnimation();
 
       if (this.inPosition.x && this.inPosition.y) {
         this.path.shift();

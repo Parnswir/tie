@@ -18,7 +18,6 @@ export default class Player extends Animated(EventEmitting()) {
     super(properties);
     this.properties = properties;
     this.tile = {x, y};
-    this.previousTile = this.tile;
     this.pos = {
       x: this.tile.x * this.properties.tileWidth + this.texture.width / 2,
       y: this.tile.y * this.properties.tileHeight + this.texture.height / 2
@@ -109,11 +108,6 @@ export default class Player extends Animated(EventEmitting()) {
     this.context.drawImage(this.getFrame(this.properties.files, this.direction), getFrameX(offset), getFrameY(offset));
   }
 
-  get previousTile () {return this._previousTile}
-  set previousTile (tile) {
-    this._previousTile = tile;
-  }
-
   get hadPath () {return this._hadPath || false}
   set hadPath (value) {
     this._hadPath = value;
@@ -139,37 +133,52 @@ export default class Player extends Animated(EventEmitting()) {
     };
   }
 
-  move () {
+  updateTile ({x, y}) {
+    const nextTile = this.properties.layer.getXYCoords(x, y);
+    if (this.tile.x !== nextTile.x || this.tile.y !== nextTile.y) {
+      this.createEvent("changeTile", nextTile);
+      this.tile = nextTile;
+    }
+  }
+
+  _moveInPath () {
+    if (this.inPosition.x && this.inPosition.y) {
+      this.path.shift();
+      this.createEvent("pathComplete", this.path);
+    } else {
+      this._moveTowardsTarget();
+    }
+  }
+
+  _moveTowardsTarget () {
     const speed = this.properties.speed;
+    const modifier = Direction.getModifier(this.pos, this.target);
+    this.pos = {
+      x: this.pos.x + modifier.x * speed,
+      y: this.pos.y + modifier.y * speed
+    };
+    const nextTile = {
+      x: this.tile.x + modifier.x,
+      y: this.tile.y + modifier.y
+    };
+    this.direction = Direction.from(this.tile, nextTile);
+  }
+
+  _completeMovement () {
+    if (this.hadPath) {
+      this.createEvent("movementComplete");
+      this.hadPath = false;
+    }
+  }
+
+  move () {
     if (this.path.length > 0) {
       this.hadPath = true;
       this.stepAnimation();
-
-      if (this.inPosition.x && this.inPosition.y) {
-        this.path.shift();
-        this.createEvent("pathComplete", this.path);
-      } else {
-        if (!this.inPosition.x) {
-          const modifier = (this.target.x - this.pos.x) / Math.abs(this.target.x - this.pos.x);
-          this.direction = modifier > 0 ? Direction.RIGHT : Direction.LEFT;
-          this.pos.x += modifier * speed;
-        }
-        if (!this.inPosition.y) {
-          const modifier = (this.target.y - this.pos.y) / Math.abs(this.target.y - this.pos.y);
-          this.direction = modifier > 0 ? Direction.DOWN : Direction.UP;
-          this.pos.y += modifier * speed;
-        }
-      }
+      this._moveInPath();
     } else {
-      if (this.hadPath) {
-        this.createEvent("movementComplete");
-        this.hadPath = false;
-      }
+      this._completeMovement();
     }
-    this.tile = this.properties.layer.getXYCoords(this.pos.x, this.pos.y);
-    if (this.tile.x !== this.previousTile.x || this.tile.y !== this.previousTile.y) {
-      this.createEvent("changeTile", this.tile);
-      this.previousTile = this.tile;
-    }
+    this.updateTile(this.pos);
   }
 }

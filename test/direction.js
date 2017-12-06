@@ -41,3 +41,18 @@ test('#tileInDirection works for specified step', t => {
   t.deepEqual(Direction.tileInDirection(P, Direction.DOWN, 8), {x: P.x, y: P.y + 8});
   t.deepEqual(Direction.tileInDirection(P, Direction.UP, 6), {x: P.x, y: P.y - 6});
 });
+
+test('#getModifier determines on which axis a target is situated', t => {
+  const P = {x: 5, y: 7};
+  t.deepEqual(Direction.getModifier(P, P), {x: 0, y: 0});
+
+  t.deepEqual(Direction.getModifier(P, {x: 5, y: 8}), {x: 0, y: 1});
+  t.deepEqual(Direction.getModifier(P, {x: 9, y: 7}), {x: 1, y: 0});
+  t.deepEqual(Direction.getModifier(P, {x: 5, y: 4}), {x: 0, y: -1});
+  t.deepEqual(Direction.getModifier(P, {x: 1, y: 7}), {x: -1, y: 0});
+
+  t.deepEqual(Direction.getModifier(P, {x: 6, y: 8}), {x: 1, y: 1});
+  t.deepEqual(Direction.getModifier(P, {x: 2, y: 9}), {x: -1, y: 1});
+  t.deepEqual(Direction.getModifier(P, {x: 6, y: 4}), {x: 1, y: -1});
+  t.deepEqual(Direction.getModifier(P, {x: 3, y: 4}), {x: -1, y: -1});
+});

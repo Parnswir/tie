@@ -16,4 +16,9 @@ export default class Direction {
     }
   }
 
+  static getModifier (pos, target) {
+    const _mod = (axis) => (target[axis] - pos[axis]) / Math.abs(target[axis] - pos[axis]);
+    return {x: _mod('x') || 0, y: _mod('y') || 0};
+  }
+
 }

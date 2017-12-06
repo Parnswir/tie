@@ -136,3 +136,97 @@ test('#inPosition works for set targets', t => {
   t.truthy(player.inPosition.x);
   t.truthy(player.inPosition.y);
 });
+
+test('#_completeMovement emits an event if a path was completed', t => {
+  const player = new Player({}, {}, 3, 6);
+  t.plan(2);
+  player.on('movementComplete', () => t.pass());
+  player._completeMovement(); // should not send event
+  player.hadPath = true;
+  player._completeMovement(); // should send event
+  t.falsy(player.hadPath);
+});
+
+test('#_moveTowardsTarget moves the player by [speed] pixels into the direction of the target', t => {
+  const SPEED = 3;
+  const player = new Player({}, {speed: SPEED}, 3, 6);
+  const startPos = player.pos;
+
+  player.target = {x: 3, y: 7};
+  player._moveTowardsTarget();
+
+  t.is(player.pos.y, startPos.y + SPEED);
+});
+
+test('#_moveTowardsTarget lets the player look into the direction of the target', t => {
+  const player = new Player({}, {}, 5, 3);
+  player.direction = Direction.UP;
+
+  player.target = {x: 3, y: 3};
+  player._moveTowardsTarget();
+
+  t.is(player.direction, Direction.LEFT);
+});
+
+test('#_moveInPath moves towards the first path element', t => {
+  const player = new Player({}, {}, 5, 3);
+  const startPos = player.pos;
+  player.path = [{x: 5, y: 2}, {x: 4, y: 2}];
+  player._moveInPath();
+  t.is(player.pos.y, startPos.y - 1);
+});
+
+test('#_moveInPath emits an event if it´s path is finished', t => {
+  const player = new Player({}, {}, 5, 3);
+  const startPos = player.pos;
+  t.plan(2);
+  player.on('pathComplete', () => t.pass());
+  player.path = [];
+  player._moveInPath();
+  t.deepEqual(player.pos, startPos);
+});
+
+test('#_moveInPath emits an event if it´s target is reached', t => {
+  t.plan(3);
+  const player = new Player({}, {}, 6, 7);
+  const startPos = player.pos;
+  const [FIRST, SECOND] = [player.tile, {x: 2, y: 6}];
+  player.on('pathComplete', (p, newPath) => {
+    t.is(p, player);
+    t.deepEqual(newPath, [SECOND]);
+  });
+  player.path = [FIRST, SECOND];
+  player._moveInPath();
+  t.deepEqual(player.pos, startPos);
+});
+
+test('#updateTile changes the tile according to the new position', t => {
+  const player = new Player({}, {
+    layer: {
+      getXYCoords: (x, y) => {
+        return {x: Math.floor(x / 32), y: Math.floor(y / 32)}
+      }
+    }
+  }, 6, 7);
+  const startTile = player.tile;
+  player.updateTile({x: player.pos.x + 32, y: player.pos.y});
+  t.notDeepEqual(player.tile, startTile);
+  t.deepEqual(player.tile, {x: 7, y: 7});
+});
+
+test('#updateTile emits an event when actually changing the tile', t => {
+  const TILE = {x: 1, y: 2};
+  const player = new Player({}, {
+    layer: {
+      getXYCoords: (x, y) => TILE
+    }
+  }, 6, 7);
+  const startTile = player.tile;
+  player.on('changeTile', (p, newTile) => {
+    t.is(p, player);
+    t.deepEqual(newTile, TILE);
+  });
+  t.plan(2);
+  player.updateTile({x: 1, y: 1});
+  player.updateTile({x: 1, y: 1});
+});

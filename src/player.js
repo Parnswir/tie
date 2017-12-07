@@ -1,32 +1,29 @@
 import EventEmitting from './EventEmitter';
+import Animated from './Animated';
 import Direction from './direction';
 
-export default class Player extends EventEmitting() {
+const defaults = (options) => {
+  options.tileWidth = options.tileWidth || 32;
+  options.tileHeight = options.tileHeight || 32;
+  options.speed = options.speed || 1;
+  options.animationFrameCount = options.movementFrameCount || 8;
+  options.framesPerDirection = options.framesPerDirection || 4;
+  return options;
+}
+
+export default class Player extends Animated(EventEmitting()) {
 
   constructor(context, properties={}, x=0, y=0, pathfind) {
-    super();
+    properties = defaults(properties);
+    super(properties);
     this.properties = properties;
     this.tile = {x, y};
-    this.previousTile = this.tile;
     this.pos = {
       x: this.tile.x * this.properties.tileWidth + this.texture.width / 2,
       y: this.tile.y * this.properties.tileHeight + this.texture.height / 2
     }
     this.context = context;
     this.pathfind = pathfind;
-
-    this.movementFrame = 0;
-    this.movementFrameCounter = Math.floor(Math.random() * this.properties.movementFrameCount);
-  }
-
-  get properties () {return this._properties}
-  set properties (options) {
-    options.tileWidth = options.tileWidth || 32;
-    options.tileHeight = options.tileHeight || 32;
-    options.movementFrameCount = options.movementFrameCount || 8;
-    options.framesPerDirection = options.framesPerDirection || 4;
-    options.speed = options.speed || 1;
-    this._properties = options
   }
 
   get tile () {return this._tile}
@@ -52,19 +49,19 @@ export default class Player extends EventEmitting() {
     this._path = path
   }
 
-  get id () {return this._properties.id}
+  get id () {return this.properties.id}
   set id (id) {
-    this._properties.id = id;
+    this.properties.id = id;
   }
 
-  get zIndex () {return this._properties.zIndex}
+  get zIndex () {return this.properties.zIndex}
   set zIndex (zIndex) {
-    this._properties.zIndex = zIndex;
+    this.properties.zIndex = zIndex;
   }
 
-  get useLighting () {return this._properties.useLighting}
+  get useLighting () {return this.properties.useLighting}
   set useLighting (useLighting) {
-    this._properties.useLighting = useLighting;
+    this.properties.useLighting = useLighting;
   }
 
   get texture () {
@@ -105,30 +102,10 @@ export default class Player extends EventEmitting() {
   }
 
   draw () {
-    let getFrame = () => this.properties.files[this.properties.framesPerDirection * this.direction + this.movementFrame];
     let getFrameX = (offset) => this.pos.x - this.texture.width / 2 + offset.x;
     let getFrameY = (offset) => this.pos.y - this.texture.height / 2 + offset.y;
     let offset = this.properties.layer.getOffset();
-    this.context.drawImage(getFrame(), getFrameX(offset), getFrameY(offset));
-  }
-
-  get movementFrame () {return this._movementFrame}
-  set movementFrame (frame) {
-    this._movementFrame = frame % this.properties.framesPerDirection;
-  }
-
-  get movementFrameCounter () {return this._movementFrameCounter}
-  set movementFrameCounter (frame) {
-    this._movementFrameCounter = frame;
-    if (this._movementFrameCounter >= this.properties.movementFrameCount - 1) {
-      this.movementFrame += 1;
-      this._movementFrameCounter = 0;
-    }
-  }
-
-  get previousTile () {return this._previousTile}
-  set previousTile (tile) {
-    this._previousTile = tile;
+    this.context.drawImage(this.getFrame(this.properties.files, this.direction), getFrameX(offset), getFrameY(offset));
   }
 
   get hadPath () {return this._hadPath || false}
@@ -156,37 +133,52 @@ export default class Player extends EventEmitting() {
     };
   }
 
-  move () {
+  updateTile ({x, y}) {
+    const nextTile = this.properties.layer.getXYCoords(x, y);
+    if (this.tile.x !== nextTile.x || this.tile.y !== nextTile.y) {
+      this.createEvent("changeTile", nextTile);
+      this.tile = nextTile;
+    }
+  }
+
+  _moveInPath () {
+    if (this.inPosition.x && this.inPosition.y) {
+      this.path.shift();
+      this.createEvent("pathComplete", this.path);
+    } else {
+      this._moveTowardsTarget();
+    }
+  }
+
+  _moveTowardsTarget () {
     const speed = this.properties.speed;
+    const modifier = Direction.getModifier(this.pos, this.target);
+    this.pos = {
+      x: this.pos.x + modifier.x * speed,
+      y: this.pos.y + modifier.y * speed
+    };
+    const nextTile = {
+      x: this.tile.x + modifier.x,
+      y: this.tile.y + modifier.y
+    };
+    this.direction = Direction.from(this.tile, nextTile);
+  }
+
+  _completeMovement () {
+    if (this.hadPath) {
+      this.createEvent("movementComplete");
+      this.hadPath = false;
+    }
+  }
+
+  move () {
     if (this.path.length > 0) {
       this.hadPath = true;
-      this.movementFrameCounter += 1;
-
-      if (this.inPosition.x && this.inPosition.y) {
-        this.path.shift();
-        this.createEvent("pathComplete", this.path);
-      } else {
-        if (!this.inPosition.x) {
-          const modifier = (this.target.x - this.pos.x) / Math.abs(this.target.x - this.pos.x);
-          this.direction = modifier > 0 ? Direction.RIGHT : Direction.LEFT;
-          this.pos.x += modifier * speed;
-        }
-        if (!this.inPosition.y) {
-          const modifier = (this.target.y - this.pos.y) / Math.abs(this.target.y - this.pos.y);
-          this.direction = modifier > 0 ? Direction.DOWN : Direction.UP;
-          this.pos.y += modifier * speed;
-        }
-      }
+      this.stepAnimation();
+      this._moveInPath();
     } else {
-      if (this.hadPath) {
-        this.createEvent("movementComplete");
-        this.hadPath = false;
-      }
+      this._completeMovement();
     }
-    this.tile = this.properties.layer.getXYCoords(this.pos.x, this.pos.y);
-    if (this.tile.x !== this.previousTile.x || this.tile.y !== this.previousTile.y) {
-      this.createEvent("changeTile", this.tile);
-      this.previousTile = this.tile;
-    }
+    this.updateTile(this.pos);
   }
 }

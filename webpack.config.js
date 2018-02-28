@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
+  mode: 'production',
   context: path.resolve(__dirname, './src'),
   entry: [
     'babel-polyfill',

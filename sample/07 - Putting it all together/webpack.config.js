@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
+  mode: 'development',
   context: path.resolve(__dirname, '.'),
   entry: [
     'babel-polyfill',
@@ -23,11 +24,13 @@ module.exports = {
     ]
   },
   output: {
-    path: 'dist',
-    publicPath: 'dist'
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist/'),
+    publicPath: '/dist/',
   },
   devServer: {
-    contentBase: __dirname,
+    contentBase: path.resolve(__dirname, '.'),
+    publicPath: '/dist/',
     watchContentBase: true
   }
 };

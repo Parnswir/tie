@@ -1,4 +1,4 @@
-import {noop} from 'util';
+import {noop} from './util';
 
 export default class ActionExecutor {
   constructor() {
@@ -25,13 +25,13 @@ export default class ActionExecutor {
   }
 
   execute(options, engine, player) {
-    const {blocking, executor} = this._actions[options.type] || {blockking: false, executor: noop};
+    const {blocking, executor} = this._actions[options.type] || {blocking: false, executor: noop};
     if (executor) {
       if (options.next) {
         if (blocking) {
           executor(options, engine, player, this.execute.bind(this, options.next, engine, player));
         } else {
-          executor(options, engine, player);
+          executor(options, engine, player, noop);
           this.execute(options.next, engine, player);
         }
       } else {

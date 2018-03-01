@@ -4,12 +4,25 @@ import sinon from 'sinon';
 import ActionExecutor from '../src/action';
 import {noop} from '../src/util';
 
+import * as util from '../src/util';
+
 test('#registerAction works', t => {
   const ae = new ActionExecutor();
   const TYPE = 'test';
   t.deepEqual(ae._actions[TYPE], void 0);
   ae.registerAction(TYPE, noop);
   t.is(ae._actions[TYPE].executor, noop);
+});
+
+test('#registerAction accepts but ignores empty handlers', t => {
+  const handler = sinon.spy(util, 'noop');
+  const ae = new ActionExecutor();
+  const TYPE = 'test';
+  const [OPTIONS, ENGINE, PLAYER] = [{type: TYPE}, {b: 2}, {c: 3}];
+  ae.registerAction(TYPE);
+  ae.execute(OPTIONS, ENGINE, PLAYER);
+  t.is(ae['_actions'][TYPE].executor, handler);
+  t.truthy(handler.called);
 });
 
 test('#registerAction does not register an action twice if not forced', t => {

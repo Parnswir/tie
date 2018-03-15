@@ -25,7 +25,7 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      - run: nyc ava --tap | tap-xunit > .unit-test.xml
+      - run: npm run ci-test
 
       - store_test_results:
           path: .unit-test.xml

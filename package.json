@@ -20,6 +20,7 @@
   "dependencies": {},
   "scripts": {
     "test": "nyc ava",
+    "ci-test": "nyc ava --tap | tap-xunit > .unit-test.xml",
     "report": "nyc report --reporter=html"
   },
   "babel": {

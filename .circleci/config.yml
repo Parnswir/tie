@@ -2,7 +2,9 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:7.10
+      - image: cypress/base:6
+        environment:
+          TERM: xterm
 
     working_directory: ~/repo
 

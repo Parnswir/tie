@@ -1,0 +1,5 @@
+{
+  "integrationFolder": "test",
+  "trashAssetsBeforeHeadlessRuns": true,
+  "videoRecording": false
+}

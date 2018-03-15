@@ -26,3 +26,5 @@ jobs:
       - run: npm test
 
       - run: ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls
+
+      - run: node integration.js

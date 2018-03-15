@@ -4,3 +4,5 @@ node_modules
 dist
 coverage
 .nyc_output
+.integration
+.unit-test.xml

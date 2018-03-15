@@ -1,5 +1,6 @@
 {
   "integrationFolder": "test",
-  "trashAssetsBeforeHeadlessRuns": true,
-  "videoRecording": false
+  "trashAssetsBeforeHeadlessRuns": false,
+  "screenshotsFolder": "../../.integration/screenshots",
+  "videosFolder": "../../.integration/videos"
 }

@@ -1,6 +1,6 @@
 const { spawn, spawnSync } = require('child_process');
 const { lstatSync, readdirSync } = require('fs');
-const { join, resolve } = require('path');
+const { dirname, join, sep, resolve } = require('path');
 
 const isDirectory = source => lstatSync(source).isDirectory();
 const getDirectories = source => readdirSync(source).map(name => join(source, name)).filter(isDirectory);
@@ -52,8 +52,14 @@ const runServer = (directory, callback) => {
 }
 
 const launchTests = (directory, callback) => {
+  const suiteName = directory.split(sep).pop()
+  const reportPath = `../../.integration/cypress-${suiteName}.xml`;
   const cypressCommand = resolve(__dirname, 'node_modules/.bin/cypress');
-  const cypress = spawn(cypressCommand, ['run', '--project', `"${directory}"`], {shell: true});
+  const cypress = spawn(cypressCommand, [
+                        'run', '--project', `"${directory}"`,
+                        '--reporter', 'junit', '--reporter-options',
+                        `"mochaFile=${reportPath}"`
+                        ], {shell: true});
 
   cypress.stdout.pipe(process.stdout);
   cypress.stderr.pipe(process.stderr);

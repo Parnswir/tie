@@ -25,8 +25,19 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      - run: npm test
+      - run: nyc ava --tap | tap-xunit > .unit-test.xml
+
+      - store_test_results:
+          path: .unit-test.xml
 
       - run: ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls
 
       - run: node integration.js
+
+      - store_test_results:
+          path: .integration
+
+      - store_artifacts:
+          path: .integration/videos
+      - store_artifacts:
+          path: .integration/screenshots

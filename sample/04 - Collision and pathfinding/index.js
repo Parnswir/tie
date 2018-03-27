@@ -16,3 +16,6 @@ tileEngine.init('./map.json').then(() => {
     player.on('once:movementComplete', () => player.direction = 0);
   });
 });
+
+// for integration tests:
+window.tileEngine = tileEngine;

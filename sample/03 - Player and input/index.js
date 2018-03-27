@@ -5,3 +5,6 @@ let tileEngine = new TileEngine(0, 0, 5, 5, {
   enableMouseInput: true
 });
 tileEngine.init('./map.json');
+
+// for integration tests:
+window.tileEngine = tileEngine;
